@@ -24,7 +24,7 @@ let handler = async (m, { conn, command }) => {
         const participants = groupMetadata.participants.map(u => u.id)
 
         await conn.sendMessage(m.chat, {
-            video: fs.readFileSync('./media/fakenuke.mp4'),
+        
             caption: "☣️ 𝐍𝐔𝐊𝐄 𝐈𝐍 𝐂𝐎𝐑𝐒𝐎..."
         }, { quoted: m })
 
