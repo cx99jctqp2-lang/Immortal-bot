@@ -14,10 +14,10 @@ let handler = async (m, { conn }) => {
 
     // Schede di contatto (vCard)
     const vcards = [
-        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;Vale | 𝚁𝚒𝚕𝚎𝚢;;;\nFN:Vale | 𝙾𝚆𝙽\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:CEO\nitem1.TEL;waid=81 8016522578\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
-        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;Diego;;;\nFN:𝙻𝚎𝚡𝚊\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=81 70-9491-4530\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
-        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;Matte;;;\nFN:𝙸𝚖𝚖𝚘𝚛𝚝𝚊𝚕\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=90 534 862 29 18\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
-        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;Giuse;;;\nFN:𝙴𝚗𝚍𝚢\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=39 350 198 9497\nitem1.X-ABLabel:Cellulare\nEND:VCARD` }
+        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝚁𝚒𝚕𝚎𝚢;;;\nFN:𝚁𝚒𝚕𝚎𝚢 𝙾𝚆𝙽\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:CEO\nitem1.TEL;waid=81 8016522578\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
+        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝙻𝚎𝚡𝚊;;;\nFN:𝙻𝚎𝚡𝚊\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=81 70-9491-4530\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
+        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝙸𝚖𝚖𝚘𝚛𝚝𝚊𝚕;;;\nFN:𝙸𝚖𝚖𝚘𝚛𝚝𝚊𝚕\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=90 534 862 29 18\nitem1.X-ABLabel:Cellulare\nEND:VCARD` },
+        { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝙴𝚗𝚍𝚢;;;\nFN:𝙴𝚗𝚍𝚢\nORG:𝐑𝐥𝐲𝐁𝐨𝐭\nTITLE:Staff\nitem1.TEL;waid=39 350 198 9497\nitem1.X-ABLabel:Cellulare\nEND:VCARD` }
     ];
 
     // Testo elegante con i numeri in chiaro
