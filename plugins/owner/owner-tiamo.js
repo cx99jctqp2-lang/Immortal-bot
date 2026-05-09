@@ -1,6 +1,6 @@
 const handler = async (m, { conn, args }) => {
     if (args.length < 1) {
-        return m.reply(`Uso corretto: .dspam <quantità>\nEsempio: .dspam 5`);
+        return m.reply(`Uso corretto: .tiamo <quantità>\nEsempio: .tiamo 5`);
     }
 
     let times = parseInt(args[0]);
