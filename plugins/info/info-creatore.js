@@ -2,8 +2,8 @@ import pkg from '@chatunity/baileys'
 const { generateWAMessageFromContent } = pkg
 
 let handler = async (m, { conn }) => {
-  const ownerNumber = '+584167240185'
-  const ownerName = 'Riley'
+  const ownerNumber = '818016522578'
+  const ownerName = 'F͛S͛K͛ | 𝚛𝚒𝚕𝚎𝚢 ᵃᵏᵃ 𝚕𝚒𝚝𝚑𝚒𝚞𝚖'
   const nomebot = conn.user?.name || global.db?.data?.nomedelbot || global.nomebot || 'ChatUnity'
 
   await conn.sendContact(m.chat, [[ownerNumber, ownerName]], m)
