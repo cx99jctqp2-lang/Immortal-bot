@@ -36,9 +36,9 @@ const handler = async (m, { conn, text }) => {
   m.reply('✅ Messaggio inviato in tutti i gruppi.');
 };
 
-handler.help = ['tutti <messaggio>'];
+handler.help = ['tuttitag <messaggio>'];
 handler.tags = ['owner'];
-handler.command = ['tutti'];
+handler.command = ['tuttitag'];
 handler.owner = true;
 
 export default handler;
