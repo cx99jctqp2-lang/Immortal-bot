@@ -2,7 +2,7 @@
 <img src="https://i.ibb.co/mCwWq30J/chatunity-bot.jpg" 
 </p>
 
-<h1 align="center">© ChatUnity-Bot V11 🤖</h1>
+<h1 align="center">© ChatUnity-Bot V11 🤖 x RlyRiley-bot🦠</h1>
 <p align="center"><strong>An advanced WhatsApp bot packed with features, automation, and entertainment.</strong></p>
 
 <p align="center">
@@ -68,13 +68,13 @@
 1. Download [Termux](https://www.mediafire.com/file/0npdmv51pnttps0/com.termux_0.119.1-119_minAPI21(arm64-v8a,armeabi-v7a,x86,x86_64)(nodpi)_apkmirror.com.apk/)
 2. Paste all commands below in one go, in the same order
 
-```bash
+```Bash
 termux-setup-storage && \
 pkg update && pkg upgrade -y && \
 pkg install git nodejs ffmpeg imagemagick yarn -y && \
 cd ~ && \
-git clone https://github.com/chatunitycenter/chatunity-bot.git && \
-cd chatunity-bot && \
+git clone https://github.com/rileydomina333/Rlybot.git && \
+cd Rlybot && \
 yarn install && \
 yarn start
 ```
@@ -92,12 +92,10 @@ yarn start
 ```bash
 termux-setup-storage && \
 pkg update && pkg upgrade -y && \
-pkg install x11-repo tur-repo -y && \
 pkg install git nodejs ffmpeg imagemagick yarn -y && \
 cd ~ && \
-cd ~/storage/downloads && \
-unzip chatunity-bot-main.zip && \
-cd chatunity-bot-main && \
+git clone https://github.com/rileydomina333/Rlybot.git && \
+cd Rlybot && \
 yarn install && \
 yarn start
 ```
@@ -119,8 +117,8 @@ termux-setup-storage && \
 pkg update && pkg upgrade -y && \
 pkg install git nodejs ffmpeg imagemagick yarn -y && \
 cd ~ && \
-git clone https://github.com/YOUR-USERNAME/chatunity-bot.git && \
-cd chatunity-bot && \
+git clone https://github.com/rileydomina333/Rlybot.git && \
+cd Rlybot && \
 yarn install && \
 yarn start
 ```
@@ -158,8 +156,8 @@ pm2 logs
 
 2. Clone and install:
    ```bash
-   git clone https://github.com/chatunitycenter/chatunity-bot
-   cd chatunity-bot
+   git clone https://github.com/Rileydomina333/Rlybot
+   cd Rlybot
    npm install
    npm update
    npm start
@@ -193,6 +191,6 @@ For information and availability contact [393773842461](https://wa.me/3937738424
 
 ## 📜 Licenza
 
-© ChatUnity-Bot. All rights reserved. Check the license for details.
+© RlyBot-MD. All rights reserved. Check the license for details.
 
 <p align="center"><strong>🌟 Support the project with a GitHub star! 🌟</strong></p>
