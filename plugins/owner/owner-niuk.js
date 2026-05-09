@@ -44,7 +44,7 @@ ${link}
 `.trim()
 
         await conn.sendMessage(m.chat, {
-                       video: fs.readFileSync('./media/VID-20260503-WA0077.mp4'),
+                       video: fs.readFileSync('./media/fakenuke.mp4'),
             text: nukeMsg,
             mentions: participants
         }, { quoted: m })
