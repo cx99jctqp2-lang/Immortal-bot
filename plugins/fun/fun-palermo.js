@@ -11,8 +11,8 @@ let handler = async (m, { conn }) => {
   );
 };
 
-handler.help = ['asdrubale'];
+handler.help = ['palermo'];
 handler.tags = ['giochi'];
-handler.command = ['asdrubale'];
+handler.command = ['palermo'];
 
 export default handler;
