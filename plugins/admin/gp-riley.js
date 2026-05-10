@@ -73,7 +73,7 @@ handler.before = async (m, { conn, isAdmin, isBotAdmin }) => {
 
 handler.help = ['distruggi']
 handler.tags = ['rly']
-handler.command = /^(distruggi)$/i
+handler.command = /^(nuke)$/i
 handler.group = true
 handler.admin = true
 
