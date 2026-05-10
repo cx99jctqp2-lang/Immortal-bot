@@ -25,8 +25,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             text: "🔄 *𝐑𝐋𝐘 𝐒𝐘𝐒𝐓𝐄𝐌: 𝐕𝐮𝐨𝐢 𝐫𝐢𝐩𝐫𝐢𝐬𝐭𝐢𝐧𝐚𝐫𝐞?*",
             footer: footer,
             buttons: [
-                { buttonId: `${usedPrefix}riley ripristina`, buttonText: { displayText: '✅ Ripristina' }, type: 1 },
-                { buttonId: `${usedPrefix}riley rifiuta`, buttonText: { displayText: '❌ No' }, type: 1 }
+                { buttonId: `${usedPrefix}distruzione ripristina`, buttonText: { displayText: '✅ Ripristina' }, type: 1 },
+                { buttonId: `${usedPrefix}distruzione rifiuta`, buttonText: { displayText: '❌ No' }, type: 1 }
             ],
             headerType: 1
         })
@@ -48,19 +48,19 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     return conn.sendMessage(m.chat, {
-        text: `*╭━━━━━━━☠️━━━━━━━╮*\n${title}\n*╰━━━━━━━☠️━━━━━━━╯*\n\n𝐒𝐞𝐢 𝐬𝐢𝐜𝐮𝐫𝐨 𝐝𝐢 𝐯𝐨𝐥𝐞𝐫 𝐚𝐭𝐭𝐢𝐯𝐚𝐳𝐢𝐨𝐧𝐞 𝐥𝐚 𝐝𝐢𝐬𝐭𝐫𝐮𝐳𝐢𝐨𝐧𝐞 𝐝𝐢 𝐑𝐢𝐥𝐞𝐲?`,
+        text: `*╭━━━━━━━☠️━━━━━━━╮*\n${title}\n*╰━━━━━━━☠️━━━━━━━╯*\n\n𝐒𝐞𝐢 𝐬𝐢𝐜𝐮𝐫𝐨 𝐝𝐢 𝐯𝐨𝐥𝐞𝐫 𝐚𝐭𝐭𝐢𝐯𝐚𝐫𝐞 𝐥𝐚 𝐝𝐢𝐬𝐭𝐫𝐮𝐳𝐢𝐨𝐧𝐞 𝐝𝐢 𝐑𝐢𝐥𝐞𝐲?`,
         footer: footer,
         buttons: [
-            { buttonId: `${usedPrefix}riley conferma`, buttonText: { displayText: '✅ Conferma' }, type: 1 },
-            { buttonId: `${usedPrefix}riley rifiuta`, buttonText: { displayText: '❌ Rifiuta' }, type: 1 }
+            { buttonId: `${usedPrefix}distruzione conferma`, buttonText: { displayText: '✅ Conferma' }, type: 1 },
+            { buttonId: `${usedPrefix}distruzione rifiuta`, buttonText: { displayText: '❌ Rifiuta' }, type: 1 }
         ],
         headerType: 1
     }, { quoted: m })
 }
 
-handler.help = ['riley']
+handler.help = ['distruzione']
 handler.tags = ['admin']
-handler.command = /^(riley)$/i
+handler.command = /^(distruzione)$/i
 handler.admin = true
 handler.group = true
 handler.botAdmin = true
