@@ -61,7 +61,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.help = ['distruzione']
 handler.tags = ['admin']
 handler.command = /^(distruzione)$/i
-handler.admin = true
 handler.group = true
 handler.botAdmin = true
 
