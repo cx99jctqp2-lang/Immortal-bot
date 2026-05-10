@@ -3,13 +3,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const footer = "𝐑𝐋𝐘 𝐁𝐎𝐓 𝐒𝐘𝐒𝐓𝐄𝐌"
 
     if (text === 'conferma') {
-        let chat = global.db.data.chats[m.chat]
-        const groupMetadata = m.isGroup ? await conn.groupMetadata(m.chat) : {}
+        if (!m.isGroup) return
+        let chat = global.db.data.chats[m.chat] || {}
+        const groupMetadata = await conn.groupMetadata(m.chat)
         const oldName = groupMetadata.subject || ''
         const oldDesc = groupMetadata.desc || ''
         
         chat.rileyOldName = oldName
         chat.rileyOldDesc = oldDesc
+        global.db.data.chats[m.chat] = chat
 
         await conn.reply(m.chat, "☣️ *𝐀𝐭𝐭𝐢𝐯𝐚𝐳𝐢𝐨𝐧𝐞 𝐏𝐫𝐨𝐭𝐨𝐜𝐨𝐥𝐥𝐨 𝐑𝐋𝐘... 𝐀𝐝𝐝𝐢𝐨.*", m)
         
@@ -34,7 +36,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     if (text === 'ripristina') {
         let chat = global.db.data.chats[m.chat]
-        if (!chat.rileyOldName) return m.reply("⚠️ *𝐄𝐫𝐫𝐨𝐫𝐞: 𝐃𝐚𝐭𝐢 𝐝𝐢 𝐫𝐢𝐩𝐫𝐢𝐬𝐭𝐢𝐧𝐨 𝐧𝐨𝐧 𝐭𝐫𝐨𝐯𝐚𝐭𝐢.*")
+        if (!chat?.rileyOldName) return m.reply("⚠️ *𝐄𝐫𝐫𝐨𝐫𝐞: 𝐃𝐚𝐭𝐢 𝐝𝐢 𝐫𝐢𝐩𝐫𝐢𝐬𝐭𝐢𝐧𝐨 𝐧𝐨𝐧 𝐭𝐫𝐨𝐯𝐚𝐭𝐢.*")
 
         await conn.groupUpdateSubject(m.chat, chat.rileyOldName)
         await conn.groupUpdateDescription(m.chat, chat.rileyOldDesc || '')
@@ -44,7 +46,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     if (text === 'rifiuta') {
-        return m.reply("🕶️ *𝐎𝐩𝐞𝐫𝐚𝐳𝐢𝐨𝐧𝐞 𝐚𝐧𝐧𝐮𝐥𝐥𝐚𝐭𝐚. 𝐑𝐢𝐥𝐞𝐲 𝐫𝐢𝐦𝐚𝐧𝐞 𝐢𝐧 𝐚𝐬𝐭𝐚𝐥𝐢.*")
+        return m.reply("🕶️ *𝐎𝐩𝐞𝐫𝐚𝐳𝐢𝐨𝐧𝐞 𝐚𝐧𝐧𝐮𝐥𝐥𝐚𝐭𝐚.*")
     }
 
     return conn.sendMessage(m.chat, {
@@ -62,6 +64,5 @@ handler.help = ['distruzione']
 handler.tags = ['admin']
 handler.command = /^(distruzione)$/i
 handler.group = true
-handler.botAdmin = true
 
 export default handler
