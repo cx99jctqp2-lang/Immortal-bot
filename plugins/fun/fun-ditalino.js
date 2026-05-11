@@ -83,15 +83,15 @@ let handler = async (m, { conn }) => {
 
     const qAnim = buildContextMsg('*ditalino*')
     const seq = [
-      boldUnicode('🤟🏻 Ora faccio un ditalino a quella troia di ') + tag(target) + boldUnicode('...'),
+      boldUnicode('🤟🏻 Ora faccio un ditalino a ') + tag(target) + boldUnicode('...'),
       boldUnicode('🤟🏻🤤 Le sto sfondando la figa...'),
-      boldUnicode('🤟🏻🥵 Sento come gode la troia...'),
+      boldUnicode('🤟🏻🥵 Sento come gode...'),
       boldUnicode('"😍 Ohhsy continua, ahh, ahh"'),
       boldUnicode('"😍 Non fermarti!, ahh, ahh"'),
       boldUnicode('🤟🏻🤤 Ci siamo quasi...'),
-      boldUnicode('🤟🏻🤤 La troia sta per venire...'),
+      boldUnicode('🤟🏻🤤 sta per venire...'),
       boldUnicode('"😍😍 AHHH!!, AHHH!!"'),
-      boldUnicode('😎 La troia è venuta..'),
+      boldUnicode('😎 è venuta..'),
       boldUnicode('💦 Attenzione alla cascata!')
     ]
 
