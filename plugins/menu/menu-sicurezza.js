@@ -67,8 +67,8 @@ function generateMenuText(chat, userId, groupId, botName, usedPrefix) {
 ┃ 🛡️ *SICUREZZA & FUNZIONI*
 ┃
 ┣━━〔 💡 *GUIDA* 〕━━┓
-┃ 🟢 \`${prefix}attiva <funzione>\`
-┃ 🔴 \`${prefix}disabilita <funzione>\`
+┃ 🟢 .attiva <funzione>
+┃ 🔴 .disabilita <funzione>
 ┃
 ┣━━〔 ⚙️ *STATO* 〕━━┓
 ${statusList}
