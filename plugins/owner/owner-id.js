@@ -28,7 +28,7 @@ let handler = async (m, { conn, text }) => {
     }
 };
 
-handler.command = ['getid'];
+handler.command = ['id'];
 handler.owner = true; // solo owner
 handler.rowner = true;
 
