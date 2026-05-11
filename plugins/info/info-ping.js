@@ -1,92 +1,96 @@
-import { cpus as _cpus, totalmem, freemem } from 'os'
+// by 𝕯𝖊ⱥ𝖉𝖑𝐲 × Bonzino
+
+import os from 'os'
 import { performance } from 'perf_hooks'
-import { sizeFormatter } from 'human-readable'
-import fs from 'fs'
-import path from 'path'
 
-let format = sizeFormatter({
-  std: 'JEDEC',
-  decimalPlaces: 2,
-  keepTrailingZeroes: false,
-  render: (literal, symbol) => `${literal} ${symbol}B`,
-})
-
-let handler = async (m, { conn, usedPrefix, command }) => {
-  const userId = m.sender
-  const groupId = m.isGroup ? m.chat : null
-
-  let nomeDelBot = global.db.data.nomedelbot || `𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲`
-  let versioneBot = `${vs}`
-  let old = performance.now()
-  let neww = performance.now()
-  let speed = (neww - old).toFixed(2)
-  let uptime = process.uptime() * 1000
-
-  const cpus = _cpus().map(cpu => {
-    cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
-    return cpu
-  })
-
-  const cpu = cpus.reduce((last, cpu, _, { length }) => {
-    last.total += cpu.total
-    last.speed += cpu.speed / length
-    last.times.user += cpu.times.user
-    last.times.nice += cpu.times.nice
-    last.times.sys += cpu.times.sys
-    last.times.idle += cpu.times.idle
-    last.times.irq += cpu.times.irq
-    return last
-  }, {
-    speed: 0,
-    total: 0,
-    times: { user: 0, nice: 0, sys: 0, idle: 0, irq: 0 }
-  })
-
-  let cpuModel = cpus[0]?.model || 'Unknown Model'
-  let cpuSpeed = cpu.speed.toFixed(2)
-
-  let caption = global.t('systemStatus', userId, groupId, {
-    title: global.t('systemStatusTitle', userId, groupId),
-    uptime: clockString(uptime),
-    ping: speed,
-    cpuModel,
-    cpuSpeed,
-    ramUsed: format(totalmem() - freemem()),
-    ramTotal: format(totalmem()),
-    ramFree: format(freemem())
-  })
-
-  const videoPath = path.join(process.cwd(), 'media', 'gif', 'pong.mp4')
-
-  try {
-    const videoBuffer = fs.readFileSync(videoPath)
-    await conn.sendMessage(m.chat, {
-      video: videoBuffer,
-      gifPlayback: true,
-      mimetype: 'video/mp4',
-      caption
-    }, { quoted: m })
-  } catch (e) {
-    console.error('GIF pong error:', e.message, '| path:', videoPath)
-    await conn.sendMessage(m.chat, { text: caption }, { quoted: m })
+const toMathematicalAlphanumericSymbols = number => {
+  const map = {
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒',
+    '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗', '.': '.'
   }
+  return number.toString().split('').map(d => map[d] || d).join('')
 }
 
-handler.help = [
-  'ping', 'speed', 'velocità', 'latencia', 'velocidad', 'velocidade',
-  'geschwindigkeit', 'latenz', '速度', '延迟', 'скорость', 'задержка',
-  'سرعة', 'كمون', 'गति', 'विलंब', 'vitesse', 'latence',
-  'kecepatan', 'latensi', 'hız', 'gecikme'
-]
-handler.tags = ['info', 'tools']
-handler.command = /^(ping|speed|velocità|latencia|velocidad|velocidade|geschwindigkeit|latenz|速度|延迟|скорость|задержка|سرعة|كمون|गति|विलंब|vitesse|latence|kecepatan|latensi|hız|gecikme)$/i
+const clockString = ms => {
+  const days = Math.floor(ms / 86400000)
+  const hours = Math.floor((ms % 86400000) / 3600000)
+  const minutes = Math.floor((ms % 3600000) / 60000)
+
+  return `${toMathematicalAlphanumericSymbols(days.toString().padStart(2, '0'))}d ${toMathematicalAlphanumericSymbols(hours.toString().padStart(2, '0'))}h ${toMathematicalAlphanumericSymbols(minutes.toString().padStart(2, '0'))}m`
+}
+
+const handler = async (m, { conn, usedPrefix, isAdmin, isOwner, isROwner }) => {
+  const user = global.db.data.users[m.sender] || {}
+  const isModerator = !!user.premium && user.premiumGroup === m.chat
+
+  if (!isAdmin && !isOwner && !isROwner && !isModerator) {
+    return conn.reply(
+      m.chat,
+      '*⛔️ 𝐍𝐨𝐧 𝐬𝐞𝐢 𝐚𝐮𝐭𝐨𝐫𝐢𝐳𝐳𝐚𝐭𝐨 𝐚𝐝 𝐮𝐬𝐚𝐫𝐞 𝐪𝐮𝐞𝐬𝐭𝐨 𝐜𝐨𝐦𝐚𝐧𝐝𝐨*',
+      m
+    )
+  }
+
+  const _uptime = process.uptime() * 1000
+  const uptime = clockString(_uptime)
+
+  const start = performance.now()
+  const end = performance.now()
+  const speed = (end - start).toFixed(4)
+  const speedWithFont = toMathematicalAlphanumericSymbols(speed)
+
+  const totalMem = Math.round(os.totalmem() / (1024 * 1024))
+  const usedMem = Math.round((os.totalmem() - os.freemem()) / (1024 * 1024))
+  const ramPercent = Math.round((usedMem / totalMem) * 100)
+
+  const processMemory = process.memoryUsage()
+  const heapUsed = (processMemory.heapUsed / (1024 * 1024)).toFixed(1)
+
+  const cpuModel = os.cpus()?.[0]?.model || 'Unknown CPU'
+  const cpuCores = os.cpus()?.length || 0
+
+  const totalPlugins = Object.keys(global.plugins || {}).length
+
+  const info = `
+*╭━━━━━━━⚡━━━━━━━╮*
+*✦ 𝐑𝐋𝐘𝐁𝐎𝐓 • 𝐒𝐓𝐀𝐓𝐔𝐒 ✦*
+*╰━━━━━━━⚡━━━━━━━╯*
+
+*🚀 𝐋𝐚𝐭𝐞𝐧𝐜𝐲:* ${speedWithFont} ms
+*⏱️ 𝐔𝐩𝐭𝐢𝐦𝐞:* ${uptime}
+*💻 𝐑𝐀𝐌:* ${toMathematicalAlphanumericSymbols(usedMem)}/${toMathematicalAlphanumericSymbols(totalMem)} MB *(${toMathematicalAlphanumericSymbols(ramPercent)}%)*
+*🧠 𝐇𝐞𝐚𝐩:* ${toMathematicalAlphanumericSymbols(heapUsed)} MB
+*⚙️ 𝐂𝐏𝐔:* ${cpuModel} • ${toMathematicalAlphanumericSymbols(cpuCores)} Cores
+*🖥️ 𝐎𝐒:* ${os.platform()} ${os.arch()}
+*📦 𝐍𝐨𝐝𝐞:* ${process.version}
+*🧩 𝐏𝐥𝐮𝐠𝐢𝐧𝐬:* ${toMathematicalAlphanumericSymbols(totalPlugins)}
+*✅ 𝐒𝐭𝐚𝐭𝐮𝐬:* Online
+
+> *𝐑𝐋𝐘 𝐁𝐎𝐓*
+`.trim()
+
+  const buttons = [
+    {
+      buttonId: `${usedPrefix}ping`,
+      buttonText: { displayText: '🔄 Rifai Ping' },
+      type: 1
+    },
+    {
+      buttonId: `${usedPrefix}menu`,
+      buttonText: { displayText: '📋 Menu' },
+      type: 1
+    }
+  ]
+
+  await conn.sendMessage(m.chat, {
+    text: info,
+    buttons,
+    headerType: 1
+  }, { quoted: m })
+}
+
+handler.help = ['ping']
+handler.tags = ['info']
+handler.command = /^(ping)$/i
 
 export default handler
-
-function clockString(ms) {
-  let d = Math.floor(ms / 86400000)
-  let h = Math.floor(ms / 3600000) % 24
-  let m = Math.floor(ms / 60000) % 60
-  let s = Math.floor(ms / 1000) % 60
-  return [d, h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
