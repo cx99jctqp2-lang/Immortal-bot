@@ -1,77 +1,105 @@
-// PLUGIN SEGA
- 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const userId = m.sender;
-  const groupId = m.chat;
-  const nomeDelBot = conn.user?.name || global.db?.data?.nomedelbot || 'ChatUnity';
+// plugin by Bonzino
+import { performance } from 'perf_hooks'
 
-  let destinatario;
-  if (m.quoted && m.quoted.sender) {
-    destinatario = m.quoted.sender;
-  } else if (m.mentionedJid && m.mentionedJid.length > 0) {
-    destinatario = m.mentionedJid[0];
-  } else {
-    return m.reply(
-      global.t('segaNoTarget', userId, groupId, { prefix: usedPrefix, command }),
-      null
-    );
-  }
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+const tag = jid => '@' + String(jid || '').split('@')[0]
 
-  const nomeDestinatario = `@${destinatario.split('@')[0]}`;
-
-  const sent = await conn.sendMessage(
-    groupId,
+async function editMessage(conn, chatId, key, text, mentions = []) {
+  await conn.relayMessage(
+    chatId,
     {
-      text: global.t('segaStart', userId, groupId, { target: nomeDestinatario }),
-      mentions: [destinatario]
+      protocolMessage: {
+        key,
+        type: 14,
+        editedMessage: {
+          extendedTextMessage: {
+            text,
+            contextInfo: mentions.length ? { mentionedJid: mentions } : {}
+          }
+        }
+      }
     },
-    { quoted: m }
-  );
+    {}
+  )
+}
 
-  const frames = ['8===👊=D', '8=👊===D', '8==👊==D', '8===👊=D', '8===👊=D💦'];
-  const { key } = sent;
+let handler = async (m, { conn }) => {
+  const chatId = m.chat
+  if (!chatId) return
 
-  for (const frame of frames) {
-    const frameText = global.t('segaFrame', userId, groupId, { frame });
+  let destinatario =
+    m.quoted?.sender ||
+    (Array.isArray(m.mentionedJid) && m.mentionedJid[0]) ||
+    m?.message?.extendedTextMessage?.contextInfo?.participant ||
+    m?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
+    null
+
+  if (!destinatario) {
     await conn.sendMessage(
-      groupId,
+      chatId,
       {
-        text: frameText,
-        edit: key,
-        mentions: [destinatario]
+        text: '⚠️ *Tagga qualcuno o rispondi a un messaggio.*'
       },
       { quoted: m }
-    );
-    await new Promise(resolve => setTimeout(resolve, 20));
+    )
+    return
   }
 
-  const endText = global.t('segaEnd', userId, groupId, { target: nomeDestinatario });
+  const mittente =
+    m.sender ||
+    m.key?.participant ||
+    m.participant ||
+    (m.key?.fromMe ? conn?.user?.id : m.key?.remoteJid) ||
+    ''
 
-  await conn.sendMessage(
-    groupId,
+  const start = performance.now()
+
+  const sent = await conn.sendMessage(
+    chatId,
     {
-      text: endText,
-      edit: key,
+      text: `*Ora faccio una sega a ${tag(destinatario)}...* 😏`,
       mentions: [destinatario]
     },
     { quoted: m }
-  );
-};
+  )
 
-handler.help = [
-  'sega','jerk','masturbate','jerking','wank',
-  'masturbar','paja','hacerseunamano',
-  'masturbarse','punheta','batepapo',
-  'wichsen','selbstbefriedigung',
-  '手淫','打飞机',
-  'онанизм','дрочить',
-  'استمناء','جلق',
-  'हस्तमैथुन','हस्त',
-  'masturbation','branlette',
-  'onani','colmek','ngocok',
-  'mastürbasyon','otuz'
-];
-handler.tags = ['fun'];
-handler.command = /^(sega|jerk|masturbate|jerking|wank|masturbar|paja|hacerseunamano|masturbarse|punheta|batepapo|wichsen|selbstbefriedigung|手淫|打飞机|онанизм|дрочить|استمناء|جلق|हस्तमैथुन|हस्त|masturbation|branlette|onani|colmek|ngocok|mastürbasyon|otuz)$/i;
+  const key = sent?.key
+  if (!key) return
 
-export default handler;
+  await sleep(2000)
+
+  const frames = [
+    '*8====👊D*',
+    '*8===👊=D*',
+    '*8==👊==D*',
+    '*8=👊===D*',
+    '*8=👊===D*',
+    '*8==👊==D*',
+    '*8===👊=D*',
+    "*8====👊D💦*"
+  ]
+
+  for (const f of frames) {
+    await editMessage(conn, chatId, key, f, [destinatario])
+    const randomDelay = Math.floor(Math.random() * (900 - 300 + 1)) + 300
+    await sleep(randomDelay)
+  }
+
+  const end = performance.now()
+  const elapsed = ((end - start) / 1000).toFixed(2)
+
+  await editMessage(
+    conn,
+    chatId,
+    key,
+`*🤤 Ohhsyy babyy* 🥵\n\n ${tag(mittente)} *ha fatto una sega a ${tag(destinatario)} e ha sborrato dappertutto in ${elapsed} secondi! 💦*`,
+    [mittente, destinatario]
+  )
+}
+
+handler.help = ['segs @utente']
+handler.tags = ['fun']
+handler.command = ['sega']
+handler.group = true
+
+export default handler
