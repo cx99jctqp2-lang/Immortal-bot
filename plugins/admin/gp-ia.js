@@ -6,7 +6,7 @@ const chatHistory = new Map()
 
 const config = {
     name: '𝛥𝐗𝐈𝚶𝐍 𝚩𝚯𝐓',
-    model: 'openai',
+    model: 'riley',
     historyLimit: 15
 }
 
