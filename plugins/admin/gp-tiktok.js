@@ -53,8 +53,8 @@ let handler = async (m, { conn, args }) => {
     }
 };
 
-handler.help = ['ttdl <link>'];
+handler.help = ['tiktok <link>'];
 handler.tags = ['downloader'];
-handler.command = /^(ttdl)$/i;
+handler.command = /^(tiktok)$/i;
 
 export default handler;
