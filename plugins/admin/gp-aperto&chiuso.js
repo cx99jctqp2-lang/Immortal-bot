@@ -1,47 +1,29 @@
- 
+// by 𝕯𝖊ⱥ𝖉𝖑𝐲 × Bonzino
+
 let handler = async (m, { conn, command }) => {
-    const userId = m.sender;
-    const groupId = m.isGroup ? m.chat : null;
-    const nomeDelBot = global.db.data.nomedelbot || 'ChatUnity';
-    
-    let isOpen = /^(aperto|open|abrir|aberto|öffnen|开放|открыть|فتح|खोलना|ouvrir|buka|aç)$/i.test(command);
-    
-    await conn.groupSettingUpdate(m.chat, isOpen ? 'not_announcement' : 'announcement');
-    
-    await conn.sendMessage(m.chat, {
-        text: isOpen ? global.t('groupOpen', userId, groupId) : global.t('groupClose', userId, groupId),
-        contextInfo: {
-            forwardingScore: 999,
-            isForwarded: true,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
-                serverMessageId: '',
-                newsletterName: `${nomeDelBot}`
-            }
-        }
-    }, { quoted: m });
-};
+  let isOpen = command === 'aperto'
 
-handler.help = [
-  'open','close',
-  'aperto','chiuso',
-  'abrir','cerrar',
-  'aberto','fechado',
-  'öffnen','schließen',
-  '开放','关闭',
-  'открыть','закрыть',
-  'فتح','إغلاق',
-  'खोलना','बंद',
-  'ouvrir','fermer',
-  'buka','tutup',
-  'aç','kapat'
-];
-handler.tags = ['group'];
-handler.command = /^(aperto|chiuso|open|close|abrir|cerrar|aberto|fechado|öffnen|schließen|开放|关闭|открыть|закрыть|فتح|إغلاق|खोलना|बंद|ouvrir|fermer|buka|tutup|aç|kapat)$/i;
-handler.admin = true;
-handler.moderator = true;
-handler.botAdmin = true;
-handler.group = true;
+  await conn.groupSettingUpdate(
+    m.chat,
+    isOpen ? 'not_announcement' : 'announcement'
+  )
 
-export default handler;
+  const text = isOpen
+    ? `*『 🟢 』 𝐆𝐫𝐮𝐩𝐩𝐨 𝐚𝐩𝐞𝐫𝐭𝐨.*\n\n*𝐎𝐫𝐚 𝐭𝐮𝐭𝐭𝐢 𝐩𝐨𝐬𝐬𝐨𝐧𝐨 𝐬𝐜𝐫𝐢𝐯𝐞𝐫𝐞.*\n\n> 𝛥𝐗𝐈𝚶𝐍 𝚩𝚯𝐓`
+    : `*『 🔴 』 𝐆𝐫𝐮𝐩𝐩𝐨 𝐜𝐡𝐢𝐮𝐬𝐨.*\n\n*𝐒𝐨𝐥𝐨 𝐠𝐥𝐢 𝐚𝐝𝐦𝐢𝐧 𝐩𝐨𝐬𝐬𝐨𝐧𝐨 𝐬𝐜𝐫𝐢𝐯𝐞𝐫𝐞.*\n\n> 𝛥𝐗𝐈𝚶𝐍 𝚩𝚯𝐓`
 
+  await conn.sendMessage(m.chat, {
+    text,
+    contextInfo: {
+      ...(global.rcanal?.contextInfo || {})
+    }
+  }, { quoted: m })
+}
+
+handler.help = ['aperto', 'chiuso']
+handler.tags = ['group']
+handler.command = /^(aperto|chiuso)$/i
+handler.admin = true
+handler.botAdmin = true
+
+export default handler
