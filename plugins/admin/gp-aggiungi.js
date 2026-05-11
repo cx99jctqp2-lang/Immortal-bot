@@ -4,13 +4,13 @@ by Bonzino */
 let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) => {
   const input = String(text || '').trim()
 
-  const publicAddCommands = ['adduser']
-  const publicRemoveCommands = ['kickuser']
+  const publicAddCommands = ['aggiungi']
+  const publicRemoveCommands = ['rimuovi']
 
-  const internalAddConfirmCommands = ['_adduser_confirm']
-  const internalKickConfirmCommands = ['_kickuser_confirm']
-  const internalAddEditCommands = ['_adduser_edit']
-  const internalKickEditCommands = ['_kickuser_edit']
+  const internalAddConfirmCommands = ['_aggiungi_confirm']
+  const internalKickConfirmCommands = ['_rimuovi_confirm']
+  const internalAddEditCommands = ['_aggiungi_edit']
+  const internalKickEditCommands = ['_rimuovi_edit']
 
   const isAdd =
     publicAddCommands.includes(command) ||
@@ -35,8 +35,8 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
   const action = isAdd ? 'add' : 'remove'
   const actionLabel = isAdd ? '𝐀𝐆𝐆𝐈𝐔𝐍𝐓𝐎' : '𝐑𝐈𝐌𝐎𝐒𝐒𝐎'
   const actionText = isAdd ? 'aggiunto' : 'rimosso'
-  const baseCommand = isAdd ? 'adduser' : 'kickuser'
-  const footer = `\n\n> *𝛥𝐗𝐈𝚶𝐍 𝚩𝚯𝐓*`
+  const baseCommand = isAdd ? 'aggiungi' : 'rimuovi'
+  const footer = `\n\n> *𝐑𝐋𝐘 𝐁𝐎𝐓*`
 
   const react = async emoji => {
     try {
@@ -111,12 +111,12 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
 *╰━━━━━━━👥━━━━━━━╯*
 
 *📌 𝐈𝐧 𝐪𝐮𝐞𝐬𝐭𝐨 𝐠𝐫𝐮𝐩𝐩𝐨:*
-*${usedPrefix}adduser 393xxxxxxxxx*
-*${usedPrefix}kickuser 393xxxxxxxxx*
+*${usedPrefix}aggiungi 393xxxxxxxxx*
+*${usedPrefix}rimuovi 393xxxxxxxxx*
 
 *📌 𝐒𝐮 𝐮𝐧 𝐚𝐥𝐭𝐫𝐨 𝐠𝐫𝐮𝐩𝐩𝐨:*
-*${usedPrefix}adduser 393xxxxxxxxx 1203630xxxxxxxxx@g.us*
-*${usedPrefix}kickuser 393xxxxxxxxx 1203630xxxxxxxxx@g.us*${footer}`,
+*${usedPrefix}aggiungi 393xxxxxxxxx 1203630xxxxxxxxx@g.us*
+*${usedPrefix}rimuovi 393xxxxxxxxx 1203630xxxxxxxxx@g.us*${footer}`,
       m
     )
   }
@@ -310,12 +310,12 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
           mentions: [userJid],
           buttons: [
             {
-              buttonId: `${usedPrefix}${isAdd ? '_adduser_confirm' : '_kickuser_confirm'} ${number} ${target}`,
+              buttonId: `${usedPrefix}${isAdd ? '_aggiungi_confirm' : '_rimuovi_confirm'} ${number} ${target}`,
               buttonText: { displayText: '✅ Conferma' },
               type: 1
             },
             {
-              buttonId: `${usedPrefix}${isAdd ? '_adduser_edit' : '_kickuser_edit'} ${number} ${target}`,
+              buttonId: `${usedPrefix}${isAdd ? '_aggiungi_edit' : '_rimuovi_edit'} ${number} ${target}`,
               buttonText: { displayText: '✏️ Modifica dati' },
               type: 1
             }
@@ -402,12 +402,13 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
 handler.help = ['aggiungi', 'rimuovi']
 handler.tags = ['group']
 handler.command = [
-  'adduser',
-  'kickuser',
-  '_adduser_confirm',
-  '_kickuser_confirm',
-  '_adduser_edit',
-  '_kickuser_edit'
+  'aggiungi',
+  'rimuovi',
+  '_aggiungi_confirm',
+  '_rimuovi_confirm',
+  '_aggiungi_edit',
+  '_rimuovi_edit'
+ 
 ]
 handler.group = false
 handler.rowner = true
