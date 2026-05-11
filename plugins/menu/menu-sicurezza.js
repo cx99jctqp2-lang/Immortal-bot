@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const imagePath = path.join(__dirname, '../../media/IMG-20260509-WA0127.jpg');
 
     const botName = "ℝ𝕃𝕐 𝔹𝕆𝕋";
-    const menuText = generateMenuText(chat, userId, groupId, botName);
+    const menuText = generateMenuText(chat, userId, groupId, botName, usedPrefix);
     
     const footerText = `𝕊𝕖𝕝𝕖𝕫𝕚𝕠𝕟𝕒 𝕦𝕟𝕒 𝕔𝕒𝕥𝕖𝕘𝕠𝕣𝕚𝕒 ✨`;
 
@@ -21,10 +21,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         footer: footerText,
         buttons: [
             { buttonId: `${usedPrefix}menu`, buttonText: { displayText: '🏠 Menu Principale' }, type: 1 },
-            { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: '🛡️ Admin' }, type: 1 },
-            { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: '👑 Owner' }, type: 1 },
-            { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: '👥 Gruppo' }, type: 1 },
-            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: '🛠️ Mod' }, type: 1 },
+            { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: '🛡️ Menu Admin' }, type: 1 },
+            { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: '👑 Menu Owner' }, type: 1 },
+            { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: '👥 Menu Gruppo' }, type: 1 },
+            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: '🛠️ Menu Mod' }, type: 1 },
         ],
         viewOnce: true,
         headerType: 4,
@@ -37,7 +37,7 @@ handler.command = /^(menusicurezza|securitymenu|menusecurity|safety)$/i;
 
 export default handler;
 
-function generateMenuText(chat, userId, groupId, botName) {
+function generateMenuText(chat, userId, groupId, botName, usedPrefix) {
     const vs = global.vs || '1.5.0';
     
     const functions = {
@@ -67,8 +67,8 @@ function generateMenuText(chat, userId, groupId, botName) {
 ┃ 🛡️ *SICUREZZA & FUNZIONI*
 ┃
 ┣━━〔 💡 *GUIDA* 〕━━┓
-┃ 🟢 `{usedPrefix}attiva <funzione>`
-┃ 🔴 `{usedPrefix}disabilita <funzione>`
+┃ 🟢 \`${usedPrefix}attiva <funzione>\`
+┃ 🔴 \`${usedPrefix}disabilita <funzione>\`
 ┃
 ┣━━〔 ⚙️ *STATO* 〕━━┓
 ${statusList}
