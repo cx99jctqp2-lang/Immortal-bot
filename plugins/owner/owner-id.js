@@ -1,5 +1,5 @@
 let handler = async (m, { conn, text }) => {
-    if (!text) return m.reply('⚠️ Inserisci il link del gruppo.\n\nEsempio:\n.getid https://chat.whatsapp.com/XXXXXXXXXXXX');
+    if (!text) return m.reply('⚠️ Inserisci il link del gruppo.\n\nEsempio:\n.id https://chat.whatsapp.com/XXXXXXXXXXXX');
 
     // Estrae il codice invito
     let match = text.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)/);
