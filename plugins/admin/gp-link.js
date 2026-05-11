@@ -1,54 +1,72 @@
- async function handler(m, { conn, isBotAdmin }) {
-    const userId = m.sender;
-    const groupId = m.chat;
-    if (!isBotAdmin) {
-        return await conn.sendMessage(m.chat, {
-            text: global.t('linkgroupNoBotAdmin', userId, groupId)
-        }, { quoted: m });
-    }
-    const metadata = await conn.groupMetadata(m.chat);
-    const inviteCode = await conn.groupInviteCode(m.chat);
-    const nomeDelBot = conn.user?.name || global.db?.data?.nomedelbot || 'ChatUnity';
-    await conn.sendMessage(m.chat, {
-        text: global.t('linkgroupLinkTitle', userId, groupId, { groupName: metadata.subject }),
-        footer: global.t('linkgroupLinkFooter', userId, groupId),
-        interactiveButtons: [
-            {
-                name: 'cta_copy',
-                buttonParamsJson: JSON.stringify({
-                    display_text: global.t('linkgroupCopyButton', userId, groupId),
-                    copy_code: `https://chat.whatsapp.com/${inviteCode}`
-                })
-            }
-        ],
-        contextInfo: {
-            forwardingScore: 999,
-            isForwarded: true,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
-                serverMessageId: '',
-                newsletterName: nomeDelBot
-            }
-        }
-    }, { quoted: m });
-}
-handler.help = [
-  'linkgroup','linkgruppo','linkgrupp','linkdelgruppo',
-  'groupLink','grouplink','linkchat','chatlink',
-  'enlacegrupo','linkgrupo','enlacechat',
-  'linkdogrupo','linkgrupo_pt',
-  'gruppenlink','gruppenverweis',
-  '链接群组','群链接',
-  'ссылкагруппы','ссылканагруппу',
-  'رابطالمجموعة','لينكجروب',
-  'ग्रुपलिंक','समूहलिंक',
-  'liengroupe','liendugroupe',
-  'tautanGrup','linkgrup_id',
-  'gruplink','grupbağlantısı'
-];
-handler.tags = ['group'];
-handler.command = /^(linkgroup|link|linkgruppo|linkgrupp|linkdelgruppo|groupLink|grouplink|linkchat|chatlink|enlacegrupo|linkgrupo|enlacechat|linkdogrupo|linkgrupo_pt|gruppenlink|gruppenverweis|链接群组|群链接|ссылкагруппы|ссылканагруппу|رابطالمجموعة|لينكجروب|ग्रुपलिंक|समूहलिंक|liengroupe|liendugroupe|tautanGrup|linkgrup_id|gruplink|grupbağlantısı)$/i;
+// by 𝕯𝖊ⱥ𝖉𝖑𝐲 × Bonzino
 
-handler.group = true;
-handler.botAdmin = true;
-export default handler;
+import fetch from 'node-fetch'
+import fs from 'fs'
+import path from 'path'
+
+const handler = async (m, { conn }) => {
+  const metadata = await conn.groupMetadata(m.chat)
+  const participants = Array.isArray(metadata.participants) ? metadata.participants : []
+
+  const totalAdmins = participants.filter(p => p.admin).length
+  const totalMembers = participants.length
+
+  let inviteCode
+  try {
+    inviteCode = await conn.groupInviteCode(m.chat)
+  } catch {
+    inviteCode = null
+  }
+
+  const link = inviteCode
+    ? `https://chat.whatsapp.com/${inviteCode}`
+    : '𝐍𝐨𝐧 𝐝𝐢𝐬𝐩𝐨𝐧𝐢𝐛𝐢𝐥𝐞'
+
+  let thumbnailBuffer = null
+
+  try {
+    const groupThumb = await conn.profilePictureUrl(m.chat, 'image')
+    thumbnailBuffer = await (await fetch(groupThumb)).buffer()
+  } catch {}
+
+  if (!thumbnailBuffer) {
+    try {
+      const mediaPath = path.join(process.cwd(), 'media', 'group-pic.png')
+      if (fs.existsSync(mediaPath)) {
+        thumbnailBuffer = fs.readFileSync(mediaPath)
+      }
+    } catch {}
+  }
+
+  const text = `*╭━━━━━━━🔗━━━━━━━╮*
+*✦ 𝐈𝐧𝐟𝐨 𝐠𝐫𝐮𝐩𝐩𝐨 ✦*
+*╰━━━━━━━🔗━━━━━━━╯*
+
+*👥 𝐌𝐞𝐦𝐛𝐫𝐢:* ${totalMembers}
+
+*🔗 𝐋𝐢𝐧𝐤 𝐠𝐫𝐮𝐩𝐩𝐨:*
+${link}`
+
+  await conn.sendMessage(m.chat, {
+    text,
+    contextInfo: {
+      ...(global.rcanal?.contextInfo || {}),
+      externalAdReply: {
+        title: metadata.subject || 'Gruppo',
+        body: ' ',
+        ...(thumbnailBuffer ? { thumbnail: thumbnailBuffer } : {}),
+        mediaType: 1,
+        renderLargerThumbnail: false,
+        showAdAttribution: false
+      }
+    }
+  }, { quoted: m })
+}
+
+handler.help = ['link']
+handler.tags = ['group']
+handler.command = /^link$/i
+handler.group = true
+handler.botAdmin = true
+
+export default handler
