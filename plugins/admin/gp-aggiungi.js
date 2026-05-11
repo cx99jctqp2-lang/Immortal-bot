@@ -1,416 +1,158 @@
-/*Plugin per gestuone membri anche al di fuori del gruppo di destinazione
-by Bonzino */
+let linkRegex = /chat.whatsapp.com\/([0-9A-Za-z]{20,24})/i;
 
-let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) => {
-  const input = String(text || '').trim()
-
-  const publicAddCommands = ['aggiungi']
-  const publicRemoveCommands = ['rimuovi']
-
-  const internalAddConfirmCommands = ['_aggiungi_confirm']
-  const internalKickConfirmCommands = ['_rimuovi_confirm']
-  const internalAddEditCommands = ['_aggiungi_edit']
-  const internalKickEditCommands = ['_rimuovi_edit']
-
-  const isAdd =
-    publicAddCommands.includes(command) ||
-    internalAddConfirmCommands.includes(command) ||
-    internalAddEditCommands.includes(command)
-
-  const isKick =
-    publicRemoveCommands.includes(command) ||
-    internalKickConfirmCommands.includes(command) ||
-    internalKickEditCommands.includes(command)
-
-  const isConfirm =
-    internalAddConfirmCommands.includes(command) ||
-    internalKickConfirmCommands.includes(command)
-
-  const isEdit =
-    internalAddEditCommands.includes(command) ||
-    internalKickEditCommands.includes(command)
-
-  if (!isAdd && !isKick) return
-
-  const action = isAdd ? 'add' : 'remove'
-  const actionLabel = isAdd ? '𝐀𝐆𝐆𝐈𝐔𝐍𝐓𝐎' : '𝐑𝐈𝐌𝐎𝐒𝐒𝐎'
-  const actionText = isAdd ? 'aggiunto' : 'rimosso'
-  const baseCommand = isAdd ? 'aggiungi' : 'rimuovi'
-  const footer = `\n\n> *𝐑𝐋𝐘 𝐁𝐎𝐓*`
-
-  const react = async emoji => {
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+    // Verifica che sia stato fornito un link
+    if (!text) {
+        return m.reply(`🤖 *Inserisci il link del gruppo WhatsApp*\n\n` +
+                      `📋 *Esempio:* ${usedPrefix + command} https://chat.whatsapp.com/xxxxx\n\n` +
+                      `⚡ *Requisiti:*\n` +
+                      `• Gruppo con almeno 40 membri\n` +
+                      `• Link di invito valido\n` +
+                      `• Inviti non limitati agli admin`);
+    }
+    
+    // Estrai il codice di invito dal link
+    let [_, code] = text.match(linkRegex) || [];
+    if (!code) {
+        return m.reply('『 ❌ 』 **Link non valido**\n\n' +
+                      '✅ Formato corretto: `https://chat.whatsapp.com/xxxxxxxxx`');
+    }
+    
+    // Messaggio di elaborazione
+    let processingMsg = await m.reply('🔄 *Analizzando il gruppo...*\n⏳ Controllo requisiti in corso...');
+    
     try {
-      await conn.sendMessage(m.chat, {
-        react: {
-          text: emoji,
-          key: m.key
+        // Ottieni informazioni sul gruppo senza entrare
+        let groupInfo;
+        try {
+            groupInfo = await conn.groupGetInviteInfo(code);
+        } catch (error) {
+            return m.reply('『 ❌ 』 **Errore nell\'ottenere informazioni sul gruppo**\n\n' +
+                          '💡 *Possibili cause:*\n' +
+                          '• Link scaduto o revocato\n' +
+                          '• Link non valido\n' +
+                          '• Gruppo eliminato');
         }
-      })
-    } catch {}
-  }
-
-  if (!(isOwner || isROwner)) {
-    await react('⛔')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━⛔━━━━━━━╮*
-*✦ 𝐀𝐂𝐂𝐄𝐒𝐒𝐎 𝐍𝐄𝐆𝐀𝐓𝐎 ✦*
-*╰━━━━━━━⛔━━━━━━━╯*
-
-*❌ 𝐒𝐨𝐥𝐨 𝐨𝐰𝐧𝐞𝐫.*${footer}`,
-      m
-    )
-  }
-
-  const normalized = input
-    .replace(/\r/g, '')
-    .replace(/\n+/g, ' ')
-    .replace(/\|/g, ' ')
-    .replace(/\s+/g, ' ')
-    .replace(/\s*@\s*g\.us/gi, '@g.us')
-    .trim()
-
-  const extractGroupId = str => {
-    const match = str.match(/(?:^|\s)(\d{10,}@g\.us)(?=$|\s)/i)
-    return match ? match[1] : null
-  }
-
-  const extractInvite = str => {
-    const match = str.match(/chat\.whatsapp\.com\/([A-Za-z0-9]+)/i)
-    return match ? match[1] : null
-  }
-
-  const extractNumber = str => {
-    const match = str.match(/\b\d{6,15}\b/)
-    return match ? match[0] : ''
-  }
-
-  const normalizeJid = jid => {
-    if (!jid) return ''
-    try {
-      if (typeof conn.decodeJid === 'function') jid = conn.decodeJid(jid)
-    } catch {}
-    return String(jid || '').trim().toLowerCase()
-  }
-
-  const jidPhone = jid => normalizeJid(jid).split('@')[0].split(':')[0].replace(/\D/g, '')
-
-  const participantIds = p => [
-    p?.id,
-    p?.jid,
-    p?.lid,
-    p?.participant
-  ].filter(Boolean)
-
-  if (!input) {
-    await react('⚠️')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━👥━━━━━━━╮*
-*✦ 𝐆𝐄𝐒𝐓𝐈𝐎𝐍𝐄 𝐔𝐓𝐄𝐍𝐓𝐈 ✦*
-*╰━━━━━━━👥━━━━━━━╯*
-
-*📌 𝐈𝐧 𝐪𝐮𝐞𝐬𝐭𝐨 𝐠𝐫𝐮𝐩𝐩𝐨:*
-*${usedPrefix}aggiungi 393xxxxxxxxx*
-*${usedPrefix}rimuovi 393xxxxxxxxx*
-
-*📌 𝐒𝐮 𝐮𝐧 𝐚𝐥𝐭𝐫𝐨 𝐠𝐫𝐮𝐩𝐩𝐨:*
-*${usedPrefix}aggiungi 393xxxxxxxxx 1203630xxxxxxxxx@g.us*
-*${usedPrefix}rimuovi 393xxxxxxxxx 1203630xxxxxxxxx@g.us*${footer}`,
-      m
-    )
-  }
-
-  const groupId = extractGroupId(normalized)
-  const inviteCode = extractInvite(normalized)
-  const number = extractNumber(normalized)
-
-  let target = null
-
-  if (!groupId && !inviteCode && m.isGroup) {
-    target = m.chat
-  }
-
-  if (!number) {
-    await react('❌')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━❌━━━━━━━╮*
-*✦ 𝐍𝐔𝐌𝐄𝐑𝐎 𝐍𝐎𝐍 𝐕𝐀𝐋𝐈𝐃𝐎 ✦*
-*╰━━━━━━━❌━━━━━━━╯*${footer}`,
-      m
-    )
-  }
-
-  if (!target && !groupId && !inviteCode) {
-    await react('⚠️')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐆𝐑𝐔𝐏𝐏𝐎 𝐌𝐀𝐍𝐂𝐀𝐍𝐓𝐄 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*
-
-*📌 𝐈𝐧 𝐮𝐧 𝐠𝐫𝐮𝐩𝐩𝐨:*
-*${usedPrefix}${baseCommand} 393xxxxxxxxx*
-
-*📌 𝐄𝐬𝐭𝐞𝐫𝐧𝐨:*
-*${usedPrefix}${baseCommand} 393xxxxxxxxx 1203630xxxxxxxxx@g.us*${footer}`,
-      m
-    )
-  }
-
-  const userJid = `${number}@s.whatsapp.net`
-  const cleanUser = jidPhone(userJid)
-
-  const withTimeout = (p, ms = 30000) =>
-    Promise.race([
-      p,
-      new Promise((_, r) => setTimeout(() => r(new Error(`timeout_${ms}`)), ms))
-    ])
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms))
-
-  if (!target) {
-    if (groupId) {
-      target = groupId
-    } else {
-      try {
-        const info = await withTimeout(conn.groupGetInviteInfo(inviteCode), 20000)
-        target = info?.id
-      } catch {}
-    }
-  }
-
-  if (!target) {
-    await react('❌')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐆𝐑𝐔𝐏𝐏𝐎 𝐍𝐎𝐍 𝐕𝐀𝐋𝐈𝐃𝐎 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*${footer}`,
-      m
-    )
-  }
-
-  if (isEdit) {
-    await react('✏️')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━✏️━━━━━━━╮*
-*✦ 𝐌𝐎𝐃𝐈𝐅𝐈𝐂𝐀 𝐃𝐀𝐓𝐈 ✦*
-*╰━━━━━━━✏️━━━━━━━╯*
-
-*${usedPrefix}${baseCommand} ${number} ${target}*${footer}`,
-      m
-    )
-  }
-
-  const getMetaSafe = async jid => {
-    let lastError = null
-
-    for (let i = 0; i < 2; i++) {
-      try {
-        const meta = await withTimeout(conn.groupMetadata(jid), 20000)
-        if (meta?.id && Array.isArray(meta?.participants) && meta.participants.length > 0) {
-          return meta
+        
+        // Controlla il numero di membri (deve essere almeno 40)
+        const MIN_MEMBERS = 40;
+        if (groupInfo.size < MIN_MEMBERS) {
+            return m.reply(`『 ❌ 』 **Gruppo troppo piccolo**\n\n` +
+                          `📊 *Membri attuali:* ${groupInfo.size}\n` +
+                          `📋 *Minimo richiesto:* ${MIN_MEMBERS} membri\n\n` +
+                          `💡 Torna quando il gruppo avrà più membri!`);
         }
-      } catch (e) {
-        lastError = e
-        await sleep(1200)
-      }
-    }
-
-    try {
-      const all = await withTimeout(conn.groupFetchAllParticipating(), 25000)
-      const direct = all?.[jid]
-
-      if (direct) {
-        const participants = Array.isArray(direct.participants)
-          ? direct.participants
-          : Object.values(direct.participants || {})
-
-        return {
-          id: direct.id || jid,
-          subject: direct.subject || '',
-          participants
+        
+        // Controlla se gli inviti sono limitati agli amministratori
+        if (groupInfo.restrict) {
+            return m.reply('『 ❌ 』 **Accesso limitato**\n\n' +
+                          '🔒 Solo gli amministratori possono invitare membri in questo gruppo.\n' +
+                          '💡 Chiedi a un admin di aggiungermi manualmente.');
         }
-      }
-    } catch {}
-
-    throw lastError || new Error('metadata_unavailable')
-  }
-
-  try {
-    await react('⏳')
-
-    const meta = await getMetaSafe(target)
-    const participants = Array.isArray(meta?.participants) ? meta.participants : []
-
-    const botJid = normalizeJid(conn.user?.jid || conn.user?.id || '')
-    const botPhone = jidPhone(botJid)
-
-    const botParticipant = participants.find(p =>
-      participantIds(p).some(id => jidPhone(id) === botPhone)
-    )
-
-    if (!participants.length) {
-      await react('⚠️')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐌𝐄𝐓𝐀𝐃𝐀𝐓𝐀 𝐕𝐔𝐎𝐓𝐀 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*
-
-*𝐍𝐨𝐧 𝐫𝐢𝐞𝐬𝐜𝐨 𝐚 𝐥𝐞𝐠𝐠𝐞𝐫𝐞 𝐢 𝐦𝐞𝐦𝐛𝐫𝐢 𝐝𝐞𝐥 𝐠𝐫𝐮𝐩𝐩𝐨.*${footer}`,
-        m
-      )
-    }
-
-    if (!botParticipant) {
-      await react('⚠️')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐁𝐎𝐓 𝐍𝐎𝐍 𝐏𝐑𝐄𝐒𝐄𝐍𝐓𝐄 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*
-
-*𝐈𝐥 𝐛𝐨𝐭 𝐧𝐨𝐧 𝐫𝐢𝐬𝐮𝐥𝐭𝐚 𝐧𝐞𝐥 𝐠𝐫𝐮𝐩𝐩𝐨 𝐭𝐚𝐫𝐠𝐞𝐭.*${footer}`,
-        m
-      )
-    }
-
-    if (!['admin', 'superadmin'].includes(botParticipant.admin)) {
-      await react('⛔')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━⛔━━━━━━━╮*
-*✦ 𝐁𝐎𝐓 𝐍𝐎𝐍 𝐀𝐃𝐌𝐈𝐍 ✦*
-*╰━━━━━━━⛔━━━━━━━╯*${footer}`,
-        m
-      )
-    }
-
-    const exists = participants.some(p =>
-      participantIds(p).some(id => jidPhone(id) === cleanUser)
-    )
-
-    if (!isConfirm) {
-      await react('📍')
-      return conn.sendMessage(
-        m.chat,
-        {
-          text: `*╭━━━━━━━📍━━━━━━━╮*
-*✦ 𝐂𝐎𝐍𝐅𝐄𝐑𝐌𝐀 𝐀𝐙𝐈𝐎𝐍𝐄 ✦*
-*╰━━━━━━━📍━━━━━━━╯*
-
-*❓️𝐀𝐳𝐢𝐨𝐧𝐞:* *${action}*
-*👤𝐔𝐭𝐞𝐧𝐭𝐞:* *@${number}*
-*🏷𝐆𝐫𝐮𝐩𝐩𝐨:* *${meta?.subject || '-'}*
-*🆔️:* *${target}*${footer}`,
-          mentions: [userJid],
-          buttons: [
-            {
-              buttonId: `${usedPrefix}${isAdd ? '_aggiungi_confirm' : '_rimuovi_confirm'} ${number} ${target}`,
-              buttonText: { displayText: '✅ Conferma' },
-              type: 1
-            },
-            {
-              buttonId: `${usedPrefix}${isAdd ? '_aggiungi_edit' : '_rimuovi_edit'} ${number} ${target}`,
-              buttonText: { displayText: '✏️ Modifica dati' },
-              type: 1
+        
+        // Controlla se il bot è già nel gruppo
+        try {
+            let groupData = await conn.groupMetadata(groupInfo.id).catch(() => null);
+            if (groupData) {
+                return m.reply('『 ⚠️ 』 **Sono già in questo gruppo!**\n\n' +
+                              `📝 Nome: ${groupData.subject}\n` +
+                              `👥 Membri: ${groupData.participants.length}`);
             }
-          ],
-          headerType: 1
-        },
-        { quoted: m }
-      )
+        } catch (e) {
+        }
+        await conn.sendMessage(m.chat, {
+            text: '✅ *Requisiti soddisfatti!*\n🚀 Ingresso nel gruppo in corso...',
+            edit: processingMsg.key
+        });
+        let joinResult = await conn.groupAcceptInvite(code);
+        console.log('Bot entrato nel gruppo:', joinResult);
+        let chats = global.db.data.chats[joinResult];
+        if (!chats) {
+            chats = global.db.data.chats[joinResult] = {};
+        }
+        const EXPIRY_DAYS = 3;
+        let expiredTime = EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+        let expiryDate = new Date(Date.now() + expiredTime);
+        
+        chats.expired = Date.now() + expiredTime;
+        chats.joinedBy = m.sender;
+        chats.joinedAt = Date.now();
+        let successMessage = `✅ **Ingresso completato con successo!**\n\n` +
+                            `🏷️ *Gruppo:* ${groupInfo.subject || 'Nome non disponibile'}\n` +
+                            `👥 *Membri:* ${groupInfo.size}\n` +
+                            `📅 *Data ingresso:* ${new Date().toLocaleString('it-IT')}\n` +
+                            `⏰ *Scadenza:* ${expiryDate.toLocaleString('it-IT')}\n` +
+                            `🕐 *Durata permanenza:* ${EXPIRY_DAYS} giorni\n\n` +
+                            `💡 *Per estendere il tempo, contatta:* wa.me/393701330693`;
+        
+        await m.reply(successMessage);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await conn.sendMessage(joinResult, {
+                text: `👋 **Ciao a tutti!**\n\n` +
+                     `🤖 Sono un bot e rimarrò qui per **${EXPIRY_DAYS} giorni**\n` +
+                     `📅 Scadenza: ${expiryDate.toLocaleString('it-IT')}\n\n` +
+                     `💡 Per assistenza o per estendere la permanenza:\n` +
+                     `📱 Contatta: wa.me/393701330693\n\n` +
+                     `🚀 Buona giornata a tutti!`
+            });
+        } catch (welcomeError) {
+            console.log('Errore invio messaggio di benvenuto:', welcomeError);
+        }
+        setTimeout(async () => {
+            try {
+                console.log(`Uscita automatica programmata per il gruppo: ${joinResult}`);
+                await conn.sendMessage(joinResult, {
+                    text: `👋 **Tempo scaduto!**\n\n` +
+                         `⏰ La mia permanenza di ${EXPIRY_DAYS} giorni è terminata.\n` +
+                         `🚪 Sto per lasciare il gruppo automaticamente.\n\n` +
+                         `💡 **Per riavermi nel gruppo:**\n` +
+                         `📱 Contatta il creatore: wa.me/393701330693\n\n` +
+                         `👋 Arrivederci a tutti!`
+                });
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                await conn.groupLeave(joinResult);
+                console.log(`Bot uscito automaticamente dal gruppo: ${joinResult}`);
+                if (global.db.data.chats[joinResult]) {
+                    delete global.db.data.chats[joinResult];
+                    console.log(`Dati gruppo rimossi dal database: ${joinResult}`);
+                }
+                
+            } catch (exitError) {
+                console.error('Errore durante l\'uscita automatica:', exitError);
+                try {
+                    if (global.db.data.chats[joinResult]) {
+                        delete global.db.data.chats[joinResult];
+                    }
+                } catch (dbError) {
+                    console.error('Errore rimozione dati database:', dbError);
+                }
+            }
+        }, expiredTime);
+        console.log(`Bot entrato nel gruppo ${joinResult}, uscita programmata per:`, expiryDate);
+        
+    } catch (error) {
+        console.error('Errore nel comando entra:', error);
+        
+        let errorMessage = '『 ❌ 』 **Errore durante l\'ingresso nel gruppo**\n\n';
+        if (error.message.includes('forbidden')) {
+            errorMessage += '🔒 Accesso negato. Il gruppo potrebbe aver limitazioni.';
+        } else if (error.message.includes('not-found')) {
+            errorMessage += '🔍 Gruppo non trovato. Il link potrebbe essere scaduto.';
+        } else if (error.message.includes('conflict')) {
+            errorMessage += '⚠️ Sono già nel gruppo o c\'è un conflitto.';
+        } else {
+            errorMessage += '💡 Riprova tra qualche minuto o verifica il link.';
+        }
+        
+        errorMessage += '\n\n📧 Se il problema persiste, contatta: wa.me/393701330693';
+        
+        return m.reply(errorMessage);
     }
+};
+handler.help = ['entra *<link>*'];
+handler.tags = ['gruppo'];
+handler.command = ['entra', 'joingroup'];
+handler.private = true;
 
-    if (action === 'remove' && !exists) {
-      await react('ℹ️')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━ℹ️━━━━━━━╮*
-*✦ 𝐔𝐓𝐄𝐍𝐓𝐄 𝐍𝐎𝐍 𝐓𝐑𝐎𝐕𝐀𝐓𝐎 ✦*
-*╰━━━━━━━ℹ️━━━━━━━╯*${footer}`,
-        m
-      )
-    }
-
-    if (action === 'add' && exists) {
-      await react('ℹ️')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━ℹ️━━━━━━━╮*
-*✦ 𝐔𝐓𝐄𝐍𝐓𝐄 𝐆𝐈𝐀̀ 𝐏𝐑𝐄𝐒𝐄𝐍𝐓𝐄 ✦*
-*╰━━━━━━━ℹ️━━━━━━━╯*${footer}`,
-        m
-      )
-    }
-
-    let ok = false
-
-    for (let i = 0; i < 3; i++) {
-      try {
-        await withTimeout(conn.groupParticipantsUpdate(target, [userJid], action), 30000)
-        ok = true
-        break
-      } catch {
-        await sleep(2000)
-      }
-    }
-
-    if (!ok) {
-      await react('⚠️')
-      return conn.reply(
-        m.chat,
-        `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐓𝐈𝐌𝐄𝐎𝐔𝐓 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*
-
-*𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩 𝐧𝐨𝐧 𝐫𝐢𝐬𝐩𝐨𝐧𝐝𝐞.*${footer}`,
-        m
-      )
-    }
-
-    await react('✅')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━✅━━━━━━━╮*
-*✦ 𝐔𝐓𝐄𝐍𝐓𝐄 ${actionLabel} ✦*
-*╰━━━━━━━✅━━━━━━━╯*
-
-*👤@${number} 𝐞̀ 𝐬𝐭𝐚𝐭𝐨 ${actionText}.*
-*🏷𝐆𝐫𝐮𝐩𝐩𝐨:* *${meta?.subject || '-'}*${footer}`,
-      m,
-      { mentions: [userJid] }
-    )
-  } catch {
-    await react('❌')
-    return conn.reply(
-      m.chat,
-      `*╭━━━━━━━⚠️━━━━━━━╮*
-*✦ 𝐄𝐑𝐑𝐎𝐑𝐄 ✦*
-*╰━━━━━━━⚠️━━━━━━━╯*
-
-*𝐈𝐦𝐩𝐨𝐬𝐬𝐢𝐛𝐢𝐥𝐞 𝐥𝐞𝐠𝐠𝐞𝐫𝐞 𝐢𝐥 𝐠𝐫𝐮𝐩𝐩𝐨.*${footer}`,
-      m
-    )
-  }
-}
-
-handler.help = ['aggiungi', 'rimuovi']
-handler.tags = ['group']
-handler.command = [
-  'aggiungi',
-  'rimuovi',
-  '_aggiungi_confirm',
-  '_rimuovi_confirm',
-  '_aggiungi_edit',
-  '_rimuovi_edit'
- 
-]
-handler.group = false
-handler.rowner = true
-
-export default handler
+export default handler;
