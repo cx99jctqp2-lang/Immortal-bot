@@ -307,7 +307,7 @@ async function requestPairingCodeFlow() {
     const pairingCode = await global.conn.requestPairingCode(normalizedNumber, randomCode);
     const formattedCode = formatPairingCode(pairingCode);
 
-    console.log(chalk.bold.white(chalk.bgBlueBright('꒰🩸꒱ ◦•≫ CODICE DI COLLEGAMENTO:')), chalk.bold.white(formattedCode));
+    console.log(chalk.bold.white(chalk.bgBlueBright('꒰🖥️꒱ ◦•≫ CODICE DI COLLEGAMENTO:')), chalk.bold.white(formattedCode));
     logSystem('Inserisci il codice su WhatsApp > Dispositivi collegati > Collega un dispositivo.', 'greenBright');
   } catch (error) {
     pairingCodeRequested = false;
@@ -318,54 +318,57 @@ async function requestPairingCodeFlow() {
 let linguaOption;
 if (!hasExistingSession) {
   const menuLingua = `
-╭★────★────★────★────★────★
-│      ꒰ ¡Select language! ꒱
-│
-│  🇮🇹  1: Italiano
-│  🇺🇸  2: English
-│  🇨🇳  3: 中文
-│  🇸🇦  4: العربية
-│  🇫🇷  5: Français
-│  🇮🇳  6: हिंदी
-│  🇮🇩  7: Bahasa Indonesia
-│  🇧🇷  8: Português
-│  🇷🇺  9: Русский
-│  🇪🇸  10: Español
-│  🇩🇪  11: Deutsch
-│  🇹🇷  12: Türkçe
-│
-╰★────★────★────★────★
-               ꒷꒦ ✦ ChatUnity ✦ ꒷꒦
-╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩﹐
-`;
+┏━━〔 ✨ *ℝ𝕃𝕐 𝔹𝕆𝕋* ✨ 〕━━┓
+┃
+┃  🌐 *𝕊𝔼𝕃𝔼ℂ𝕋 𝕃𝔸ℕ𝔾𝕌𝔸𝔾𝔼*
+┃
+┃  🇮🇹  1: Italiano
+┃  🇺🇸  2: English
+┃  🇨🇳  3: 中文
+┃  🇸🇦  4: العربية
+┃  🇫🇷  5: Français
+┃  🇮🇳  6: हिंदी
+┃  🇮🇩  7: Bahasa Indonesia
+┃  🇧🇷  8: Português
+┃  🇷🇺  9: Русский
+┃  🇪🇸  10: Español
+┃  🇩🇪  11: Deutsch
+┃  🇹🇷  12: Türkçe
+┃
+┗━━━━━━━━━━━━━━━━━━┛
+        𝕊𝕪𝕤𝕥𝕖𝕞 𝕓𝕪 ℝ𝕃𝕐 𝔹𝕆𝕋
+`.trim();
+
   linguaOption = await askValidatedChoice(
-    menuLingua + '\nSelect your option ---> ',
+    menuLingua + '\n\n🔹 Select option (1-12) ➜ ',
     value => /^(1|2|3|4|5|6|7|8|9|10|11|12)$/.test(value),
-    'Opzione non valida. Inserisci un numero da 1 a 12.'
+    '❌ Opzione non valida. Inserisci un numero da 1 a 12.'
   );
 
   const languageCodes = { '1': 'it', '2': 'en', '3': 'zh', '4': 'ar', '5': 'fr', '6': 'hi', '7': 'id', '8': 'pt', '9': 'ru', '10': 'es', '11': 'de', '12': 'tr' };
   const selectedLanguage = languageCodes[linguaOption];
   global.languageManager.defaultLanguage = selectedLanguage;
-  logSystem(`Lingua impostata: ${['Italiano','English','中文','العربية','Français','हिंदी','Bahasa Indonesia','Português','Русский','Español','Deutsch','Türkçe'][parseInt(linguaOption) - 1]}`, 'greenBright');
+  logSystem(`Lingua impostata: ${['Italiano','English','中文','العربية','Français','हिंदी','Bahasa Indonesia','Português','Русский','Español','Deutsch','Türkçe'][parseInt(linguaOption) - 1]}`, 'blueBright');
 }
 
 let opzione;
 if (!pairingMode && !hasExistingSession) {
-  const menu = `╭★────★────★────★────★────★
-│      ꒰ ¡Pairing Methods! ꒱
-│
-│  👾  Option 1: QR Code
-│  ☁️  Option 2: 8 character Code
-│
-╰★────★────★────★────★
-               ꒷꒦ ✦ ChatUnity ✦ ꒷꒦
-╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩﹐
-`;
+  const menu = `
+┏━━〔 ✨ *ℝ𝕃𝕐 𝔹𝕆𝕋* ✨ 〕━━┓
+┃
+┃  🧬 *ℙ𝔸𝕀ℝ𝕀ℕ𝔾 𝕄𝔼𝕋ℍ𝕆𝔻𝕊*
+┃
+┃  👾  Option 1: QR Code
+┃  ☁️  Option 2: 8-Digit Code
+┃
+┗━━━━━━━━━━━━━━━━━━┛
+        𝕊𝕪𝕤𝕥𝕖𝕞 𝕓𝕪 ℝ𝕃𝕐 𝔹𝕆𝕋
+`.trim();
+
   opzione = await askValidatedChoice(
-    menu + '\nSelect your option ---> ',
+    menu + '\n\n🔹 Select option (1-2) ➜ ',
     value => /^[1-2]$/.test(value),
-    'Opzione non valida. Inserisci 1 per QR o 2 per codice.'
+    '❌ Opzione non valida. Inserisci 1 o 2.'
   );
   pairingMode = opzione === '1' ? 'qr' : 'code';
 }
