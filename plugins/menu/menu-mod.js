@@ -71,6 +71,6 @@ function generateMenuText(prefix, userId, groupId) {
 ╰★───────────★╯
 
 ꒷꒦ ✦ ୧・︶ : ︶ ꒷꒦ ‧₊ ୧
-> © Powered by 𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲
+> © Powered by 𝐑𝐋𝐘 𝐑𝐈𝐋𝐄𝐘 𝐁𝐎𝐓
 `.trim();
 }
