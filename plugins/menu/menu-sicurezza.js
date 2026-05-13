@@ -54,7 +54,10 @@ function generateMenuText(chat, userId, groupId, botName, usedPrefix) {
         "Anti Virus": !!chat?.antivirus,
         "Anti Bot": !!chat?.antibot,
         "Anti Media": !!chat?.antimedia,
-        "Anti TikTok": !!chat?.antitiktok
+        "Anti TikTok": !!chat?.antitiktok,
+        "Anti Bot": !!chat?.antibot,
+        "Anti gore": !!chat?.antigore,
+        "Anti nuke": !!chat?.antinuke
     };
 
     const statusList = Object.entries(functions)
