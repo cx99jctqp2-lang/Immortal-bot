@@ -1,108 +1,70 @@
+//Plugin anti VoIP by riley
+
 let handler = m => m
-handler.before = async function (m, {conn, isAdmin, isBotAdmin, isOwner, isROwner}) {
-    if (!m.isGroup) return !1
-    let chat = global.db.data.chats[m.chat]
-    let bot = global.db.data.settings[conn.user.jid] || {}
+
+handler.before = async function (m, { conn, isAdmin, isBotAdmin, isOwner, isSam }) {
+  if (!m.isGroup) return false
+  
+  const chat = global.db.data.chats[m.chat]
+  if (!chat?.antivoip) return false
+
+  // Se il bot non è admin non può espellere
+  if (!isBotAdmin) return false
+
+  let decodedSender = conn.decodeJid(m.sender)
+  let senderNumber = decodedSender.split('@')[0].split(':')[0]
+  let domain = decodedSender.split('@')[1]
+  let decodedBotJid = conn.decodeJid(conn.user.jid)
+
+  // Immunità: Bot stesso, Admin, Owner, Sam e account LID (nascosti)
+  if (decodedSender === decodedBotJid || isAdmin || isOwner || isSam || domain === 'lid') return false
+
+  // Controllo prefisso internazionale (Solo +39 consentito)
+  if (!senderNumber.startsWith('39')) {
     
-    if (isBotAdmin && chat.antipaki && !isAdmin && !isOwner && !isROwner && bot.restrict) {
-        if (m.sender.startsWith('1')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('7')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('20')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('27')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('30')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('31')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('32')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('33')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('34')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('36')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('40')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('41')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('43')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('44')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('45')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('46')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('47')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('48')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('49')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('51')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('52')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('53')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('54')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('55')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('56')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('57')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('58')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('60')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('61')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('62')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('63')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('64')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('65')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('66')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('81')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('82')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('84')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('86')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('90')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('91')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('92')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('93')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('94')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('95')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('98')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('211')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('212')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('213')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('216')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('218')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('220')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('221')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('222')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('223')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('224')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('225')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('226')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('227')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('228')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('229')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('230')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('231')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('232')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('233')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('234')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('235')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('236')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('237')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('238')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('239')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('240')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('241')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('242')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('243')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('244')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('245')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('246')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('248')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('249')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('250')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('251')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('252')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('253')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('254')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('255')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('256')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('257')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('258')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('260')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('261')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('262')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('263')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('264')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('265')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('266')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('267')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('268')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (m.sender.startsWith('269')) await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-    }
+    // Esecuzione eliminazione messaggio (opzionale ma consigliata)
+    await conn.sendMessage(m.chat, { delete: m.key }).catch(() => {})
+
+    const header = `⋆｡˚『 ╭ \`SISTEMA ANTIVOIP\` ╯ 』˚｡⋆`
+    const footer = `╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`
+    const utente = formatPhoneNumber(senderNumber, true)
+
+    const text = `${header}
+╭
+┃ 🛡️ \`Stato:\` *Protocollo Riley Attivo*
+┃
+┃ 『 👤 』 \`Target:\` ${utente}
+┃ 『 🌍 』 \`Origine:\` *Estera / VOIP*
+┃ 『 🚫 』 \`Azione:\` *ESPULSIONE IMMEDIATA*
+┃
+┃ ⚠️ \`Nota:\` In questo gruppo l'accesso è 
+┃ consentito esclusivamente a numeri italiani.
+╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`
+
+    await conn.sendMessage(m.chat, { 
+      text, 
+      mentions: [decodedSender],
+      contextInfo: {
+        externalAdReply: {
+          title: 'RILEY BORDER CONTROL',
+          body: 'Accesso negato: Numero non autorizzato',
+          thumbnailUrl: 'https://qu.ax/TfUj.jpg',
+          mediaType: 1
+        }
+      }
+    })
+
+    // Espulsione dell'utente straniero
+    await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove').catch(() => {})
+    return true
+  }
+
+  return false
 }
+
+function formatPhoneNumber(number, includeAt = false) {
+  if (!number || number === '?' || number === 'sconosciuto') return includeAt ? '@Sconosciuto' : 'Sconosciuto';
+  return includeAt ? '@' + number : number;
+}
+
 export default handler
