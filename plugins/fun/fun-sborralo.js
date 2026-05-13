@@ -46,7 +46,7 @@ let handler = async (m, { conn, text }) => {
 };
 
 
-handler.command = /^(sega2|sborrala)$/i;
-handler.help = ['sega2', 'sborrala'];  
+handler.command = /^(sega2|segariley)$/i;
+handler.help = ['sega2', 'segariley'];  
 handler.tags = ['giochi']; 
 export default handler;
