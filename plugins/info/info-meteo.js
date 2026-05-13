@@ -65,7 +65,7 @@ let handler = async (m, { conn, text }) => {
 *💨 𝐕𝐞𝐧𝐭𝐨:* ${d.wind?.speed ?? 0} m/s
 *🔽 𝐏𝐫𝐞𝐬𝐬𝐢𝐨𝐧𝐞:* ${d.main.pressure} hPa
 
-> 𝐃𝐞𝐯 𝐛𝐲 𝐁𝐨𝐧𝐳𝐢𝐧𝐨`
+> 𝐃𝐞𝐯 𝐛𝐲 𝐑𝐢𝐥𝐞𝐲`
 
     await conn.sendMessage(chat, {
       text: msg,
