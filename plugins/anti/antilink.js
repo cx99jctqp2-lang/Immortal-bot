@@ -1,155 +1,124 @@
- import fetch from 'node-fetch';
-import FormData from 'form-data';
-import { downloadContentFromMessage } from '@chatunity/baileys';
+//Plugin anti link by riley
 
-const linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})|whatsapp\.com\/channel\/([0-9A-Za-z]{20,24})/i;
-const urlRegex = /(https?:\/\/[^\s]+)/g;
+import { downloadContentFromMessage } from '@realvare/based';
+import ffmpeg from 'fluent-ffmpeg';
+import { createWriteStream, readFile } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { unlink } from 'fs/promises';
+import Jimp from 'jimp';
+import jsQR from 'jsqr';
+import fetch from 'node-fetch';
+import { FormData } from 'formdata-node';
 
-function extractTextAndUrlsFromMessage(message) {
-    const extractedContent = { text: '', urls: [] };
-    if (!message) return extractedContent;
+const WHATSAPP_GROUP_REGEX = /\bchat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i;
+const WHATSAPP_CHANNEL_REGEX = /whatsapp\.com\/channel\/([0-9A-Za-z]{20,24})/i;
+const GENERAL_URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&=]*)/gi;
+const SHORT_URL_DOMAINS = [
+    'bit.ly', 'tinyurl.com', 't.co', 'short.link', 'shorturl.at',
+    'is.gd', 'v.gd', 'goo.gl', 'ow.ly', 'buff.ly',
+    'tiny.cc', 'shorte.st', 'adf.ly', 'linktr.ee', 'rebrand.ly',
+    'bitly.com', 'cutt.ly', 'short.io', 'links.new', 'link.ly',
+    'ur.ly', 'shrinkme.io', 'clck.ru', 'short.gy', 'lnk.to',
+    'sh.st', 'ouo.io', 'bc.vc', 'adfoc.us', 'linkvertise.com',
+    'exe.io', 'linkbucks.com', 'adfly.com', 'shrink-service.it',
+    'cur.lv', 'gestyy.com', 'shrinkarn.com', 'za.gl', 'clicksfly.com',
+    '6url.com', 'shortlink.sh', 'short.tn', 'rotator.ninja',
+    'shrtco.de', 'ulvis.net', 'chilp.it', 'clicky.me',
+    'budurl.com', 'po.st', 'shr.lc', 'dub.co'
+];
 
-    function findContentInObject(obj) {
-        if (typeof obj === 'string') {
-            extractedContent.text += ' ' + obj;
-            const foundUrls = obj.match(urlRegex);
-            if (foundUrls) extractedContent.urls.push(...foundUrls);
-        } else if (typeof obj === 'object' && obj !== null) {
-            for (const key in obj) {
-                if (Object.hasOwn(obj, key)) findContentInObject(obj[key]);
+const SHORT_URL_REGEX = new RegExp(
+    `https?:\\/\\/(?:www\\.)?(?:${SHORT_URL_DOMAINS.map(d => d.replace('.', '\\.')).join('|')})\\/[\\w\\-._~:/?#[\\]@!$&'()*+,;=]*`,
+    'gi'
+);
+
+const REQUEST_HEADERS = {
+    'User-Agent': 'RLY-BOT/3.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'DNT': '1',
+    'Connection': 'keep-alive'
+};
+
+// --- LOGICA DI SUPPORTO ---
+
+function isWhatsAppLink(url) {
+    return WHATSAPP_GROUP_REGEX.test(url) || WHATSAPP_CHANNEL_REGEX.test(url);
+}
+
+async function containsSuspiciousLink(text) {
+    if (!text) return false;
+    if (isWhatsAppLink(text)) return true;
+    if (SHORT_URL_REGEX.test(text)) return true;
+    return false;
+}
+
+// --- GESTIONE VIOLAZIONE ---
+
+async function handleViolation(conn, m, reason, isBotAdmin) {
+    const sender = m.sender;
+    const header = `⋆｡˚『 ╭ \`SISTEMA ANTILINK\` ╯ 』˚｡⋆`;
+    const footer = `╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+    // Elimina il messaggio
+    if (isBotAdmin) {
+        try { await conn.sendMessage(m.chat, { delete: m.key }); } catch {}
+    }
+
+    const text = `${header}
+╭
+┃ 🚨 \`Stato:\` *Protocollo Riley Attivo*
+┃
+┃ 『 👤 』 \`Target:\` @${sender.split('@')[0]}
+┃ 『 🚫 』 \`Azione:\` *Messaggio Rimosso*
+┃ 『 🔗 』 \`Motivo:\` *${reason}*
+┃
+┃ ⚠️ \`Nota:\` L'invio di link non è autorizzato.
+╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+    await conn.sendMessage(m.chat, {
+        text,
+        mentions: [sender],
+        contextInfo: {
+            externalAdReply: {
+                title: 'RILEY SECURITY SYSTEM',
+                body: 'Link vietato rilevato',
+                thumbnailUrl: 'https://qu.ax/TfUj.jpg',
+                mediaType: 1,
+                renderLargerThumbnail: true
             }
         }
-    }
+    });
 
-    findContentInObject(message);
-    return {
-        text: extractedContent.text.trim(),
-        urls: [...new Set(extractedContent.urls)]
-    };
-}
-
-async function getMediaBuffer(message) {
-    try {
-        const msg =
-            message.message?.imageMessage ||
-            message.message?.videoMessage ||
-            message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
-            message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.videoMessage;
-
-        if (!msg) return null;
-
-        const type = msg.mimetype?.startsWith('video') ? 'video' : 'image';
-        const stream = await downloadContentFromMessage(msg, type);
-
-        let buffer = Buffer.from([]);
-        for await (const chunk of stream) {
-            buffer = Buffer.concat([buffer, chunk]);
-        }
-
-        return buffer;
-    } catch (e) {
-        console.error('Errore nel download media:', e);
-        return null;
+    // Opzionale: Rimuovi l'utente se non è admin e il bot è admin
+    if (isBotAdmin) {
+        await conn.groupParticipantsUpdate(m.chat, [sender], 'remove');
     }
 }
 
-async function readQRCode(imageBuffer) {
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+// --- HANDLER PRINCIPALE ---
 
-        const formData = new FormData();
-        formData.append('file', imageBuffer, 'image.jpg');
-
-        const response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
-            method: 'POST',
-            body: formData,
-            signal: controller.signal
-        });
-
-        clearTimeout(timeout);
-        const data = await response.json();
-        return data?.[0]?.symbol?.[0]?.data || null;
-    } catch (e) {
-        console.error('Errore lettura QR:', e);
-        return null;
-    }
-}
-
-export async function before(m, { conn, isAdmin, isBotAdmin }) {
-    if (m.isBaileys && m.fromMe) return true;
-    if (!m.isGroup) return false;
+export async function before(m, { conn, isAdmin, isBotAdmin, isOwner, isSam }) {
+    if (!m.isGroup || isAdmin || isOwner || isSam || m.fromMe) return false;
 
     const chat = global.db.data.chats[m.chat];
-    const delet = m.key.participant;
-    const bang = m.key.id;
-    const user = `@${m.sender.split('@')[0]}`;
-    const userId = m.sender;
-    const groupId = m.chat;
-    
-    const unv = {
-        key: {
-            participants: "0@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-            fromMe: false,
-            id: "Halo"
-        },
-        message: {
-            contactMessage: {
-                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Cellulare\nEND:VCARD`
-            }
-        },
-        participant: "0@s.whatsapp.net"
-    };
-    
-    const bot = global.db.data.settings[this.user.jid] || {};
+    if (!chat?.antiLink) return false;
 
-    const { text: messageText, urls: extractedUrls } = extractTextAndUrlsFromMessage(m.message || {});
-    const grupoPrefix = `https://chat.whatsapp.com`;
-    let containsGroupLink = !!linkRegex.exec(messageText) || extractedUrls.some(url => linkRegex.exec(url));
+    const extractedText = (m.text || m.caption || m.msg?.caption || m.msg?.text || '').toLowerCase();
+    
+    let linkFound = false;
+    let reason = '';
 
-    let qrLinkDetected = false;
-    if (!containsGroupLink) {
-        const media = await getMediaBuffer(m);
-        if (media) {
-            const qrData = await readQRCode(media);
-            const qrText = qrData?.replace(/[\s\u200b\u200c\u200d\uFEFF]+/g, '') ?? '';
-            if (qrText && linkRegex.test(qrText)) {
-                containsGroupLink = true;
-                qrLinkDetected = true;
-            }
-        }
+    if (await containsSuspiciousLink(extractedText)) {
+        linkFound = true;
+        reason = isWhatsAppLink(extractedText) ? 'Link WhatsApp rilevato' : 'Link/URL abbreviato rilevato';
     }
 
-    if (isAdmin && chat.antiLink && (messageText.includes(grupoPrefix) || containsGroupLink)) return;
-
-    if (chat.antiLink && containsGroupLink && !isAdmin) {
-        if (isBotAdmin) {
-            const linkThisGroup = `https://chat.whatsapp.com/${await this.groupInviteCode(m.chat)}`;
-            if (messageText.includes(linkThisGroup) || extractedUrls.includes(linkThisGroup)) return true;
-        }
-
-        if (!isBotAdmin) {
-            return m.reply(global.t('antiLinkNotAdmin', userId, groupId));
-        }
-
-        await conn.sendMessage(m.chat, {
-            text: global.t('antiLinkDetected', userId, groupId, { user, qrDetected: qrLinkDetected }),
-            mentions: [m.sender]
-        }, { quoted: unv, ephemeralExpiration: 24 * 60 * 100, disappearingMessagesInChat: 24 * 60 * 100 });
-
-        await conn.sendMessage(m.chat, {
-            delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }
-        });
-
-        const responseb = await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-        if (responseb[0].status === "404") return;
-
-        if (!bot.restrict) {
-            return m.reply(global.t('antiLinkRestrictOff', userId, groupId));
-        }
+    // Se troviamo un link, attiviamo la punizione
+    if (linkFound) {
+        await handleViolation(conn, m, reason, isBotAdmin);
+        return true;
     }
 
-    return true;
-}
-
+    return false;
+                       }
