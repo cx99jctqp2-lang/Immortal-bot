@@ -5,7 +5,7 @@ let handler = async (m, { conn, usedPrefix: _p, command, args, isOwner, isAdmin 
   const userName = m.pushName || 'Utente'
   
   // --- PERCORSO IMMAGINE LOCALE ---
-  const localImg = join(process.cwd(), 'menu-sicurezza.jpeg')
+  const localImg = join(process.cwd(), 'IMG-20260509-WA0127.jpg')
 
   global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {}
   global.db.data.settings[conn.user.jid] = global.db.data.settings[conn.user.jid] || {}
