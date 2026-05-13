@@ -641,12 +641,17 @@ global.reloadHandler = async function (restatConn) {
     conn.ev.off('creds.update', conn.credsUpdate)
   }
 
-  conn.welcome = '@user benvenuto/a in @subject'
-  conn.bye = '@user ha abbandonato il gruppo'
-  conn.spromote = '@user è stato promosso ad amministratore'
-  conn.sdemote = '@user non è più amministratore'
-  conn.sIcon = 'immagine gruppo modificata'
-  conn.sRevoke = 'link reimpostato, nuovo link: @revoke'
+  conn.welcome = " ╭─〔 🌟 BENVENUTO 🌟 〕─╮ │ 👋 @user │ Benvenuto/a in *@subject* ╰────────────────╯"
+
+conn.bye = " ╭─〔 👋 USCITA 👋 〕─╮ │ @user ha abbandonato il gruppo ╰────────────────╯"
+
+conn.spromote = " ╭─〔 🛡️ PROMOZIONE 🛡️ 〕─╮ │ 🎉 @user è stato promosso │ ad *Amministratore* ╰────────────────╯"
+
+conn.sdemote = " ╭─〔 ⚠️ RETROCESSIONE ⚠️ 〕─╮ │ @user non è più amministratore ╰────────────────╯"
+
+conn.sIcon = " ╭─〔 🖼️ GRUPPO 🖼️ 〕─╮ │ Immagine del gruppo modificata ╰────────────────╯"
+
+conn.sRevoke = " ╭─〔 🔗 NUOVO LINK 🔗 〕─╮ │ Link del gruppo reimpostato │ 🌐 @revoke ╰────────────────╯"
 
   conn.handler = handler.handler.bind(global.conn)
   conn.participantsUpdate = handler.participantsUpdate.bind(global.conn)
