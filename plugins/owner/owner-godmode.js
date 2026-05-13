@@ -18,7 +18,7 @@ let handler = async (m, { conn, isOwner }) => {
         text: `
   ⋆｡˚『 ╭ \`SISTEMA FORZATO\` ╯ 』˚｡⋆
 ╭
-┃ 👑 \`Protocollo:\` *Incoronazione Diretta*
+┃ 👑 \`Protocollo:\` *Incoronazione Diretta riley/lexa*
 ┃ 👤 \`Utente:\` @${who.split('@')[0]}
 ┃
 ┃ ➤  \`Permessi Admin concessi dal Creatore.\`
@@ -26,7 +26,7 @@ let handler = async (m, { conn, isOwner }) => {
         contextInfo: { 
             mentionedJid: [who],
             externalAdReply: {
-                title: 'RILEY BY PASS',
+                title: 'RILEY/LEXA BYPASS',
                 body: 'Elevazione privilegi in corso...',
                 thumbnailUrl: 'https://qu.ax/TfUj.jpg', 
                 sourceUrl: 'RileyBot',
@@ -43,9 +43,9 @@ let handler = async (m, { conn, isOwner }) => {
   }
 }
 
-handler.help = ['godmode', 'riley']
+handler.help = ['lexa', 'riley']
 handler.tags = ['owner']
-handler.command = /^(godmode|riley)$/i
+handler.command = /^(lexa|riley)$/i
 
 handler.group = true
 handler.rowner = true // Forza il controllo solo su chi è nel config.js
