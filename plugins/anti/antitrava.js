@@ -1,53 +1,83 @@
- 
-export async function before(m, { conn, isAdmin, isBotAdmin }) {
-    if (m.isBaileys && m.fromMe) {
+//plugin antitrava by riley
+
+let handler = m => m
+const ZALGO_REGEX = /[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]{3,}/g;
+
+function extractText(m) {
+    if (!m) return '';
+    let text = m.text || m.caption || '';
+    const poll = m.message?.pollCreationMessageV3 || m.message?.pollCreationMessage;
+    if (poll?.name) {
+        text += ' ' + poll.name;
+        poll.options?.forEach(opt => text += ' ' + opt.optionName);
+    }
+    return text;
+}
+
+export async function before(m, { conn, isAdmin, isBotAdmin, isOwner, isSam }) {
+    if (m.isBaileys && m.fromMe) return true;
+    if (!m.isGroup || !m.sender) return false;
+
+    const chat = global.db.data.chats[m.chat];
+    if (!chat || !chat.antitrava) return true;
+
+    // Immunità per Admin, Blood e il bot stesso
+    if (isAdmin || isOwner || isSam || m.fromMe) return true;
+
+    const text = extractText(m);
+    if (!text) return true;
+
+    const isTooLong = text.length > 4000;
+    const zalgoMatches = text.match(ZALGO_REGEX) || [];
+    const isZalgo = zalgoMatches.length > 5;
+
+    if (isTooLong || isZalgo) {
+        // Eliminazione immediata del messaggio pericoloso
+        await conn.sendMessage(m.chat, { delete: m.key }).catch(() => {});
+
+        // Rimozione dell'utente se il bot è admin
+        if (isBotAdmin) {
+            await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove').catch(() => {});
+        }
+
+        const userTag = m.sender.split('@')[0];
+        const reason = isTooLong ? 'Eccessiva lunghezza (Trava)' : 'Caratteri Zalgo/Crash rilevati';
+        
+        // Messaggio estetico RLY-BOT
+        const header = `⋆｡˚『 ╭ \`ANTITRAVA SYSTEM\` ╯ 』˚｡⋆`;
+        const footer = `╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+        const textMsg = `${header}
+╭
+┃ 🛡️ \`Stato:\` *Protocollo Riley Attivo*
+┃
+┃ 『 👤 』 \`Target:\` @${userTag}
+┃ 『 ⚠️ 』 \`Rilevato:\` *Tentativo di Crash*
+┃ 『 🚫 』 \`Azione:\` *ELIMINAZIONE UTENTE*
+┃ 『 📝 』 \`Motivo:\` ${reason}
+┃
+┃ ⚠️ \`Nota:\` I tentativi di destabilizzazione
+┃ del gruppo non sono tollerati.
+╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+        await conn.sendMessage(m.chat, {
+            text: textMsg,
+            mentions: [m.sender],
+            contextInfo: {
+                externalAdReply: {
+                    title: 'RILEY CRASH PROTECTION',
+                    body: 'Minaccia neutralizzata',
+                    thumbnailUrl: 'https://qu.ax/TfUj.jpg',
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
+        });
+
         return true;
     }
-    if (!m.isGroup) {
-        return false;
-    }
-    
-    let chat = global.db.data.chats[m.chat] || {};
-    let bot = global.db.data.settings[this.user.jid] || {};
-    const userId = m.sender;
-    const groupId = m.chat;
-    
-    if (chat.antiTraba && m.text.length > 4000) {
-        const user = m.sender.split("@")[0];
-        
-        if (isAdmin) {
-            return await conn.sendMessage(m.chat, { 
-                text: global.t('antiTrabaAdminWarning', userId, groupId, { user }), 
-                mentions: [m.sender] 
-            });
-        }
 
-        if (isBotAdmin) {
-            await conn.sendMessage(m.chat, { 
-                delete: { 
-                    remoteJid: m.chat, 
-                    fromMe: false, 
-                    id: m.key.id, 
-                    participant: m.key.participant 
-                }
-            });
-
-            setTimeout(async () => {
-                await conn.sendMessage(m.chat, {
-                    text: global.t('antiTrabaDetected', userId, groupId, { user }),
-                    mentions: [m.sender]
-                });
-            }, 0);
-
-            setTimeout(async () => {
-                await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-            }, 1000);
-
-        } else if (!bot.restrict) {
-            return m.reply(global.t('antiTrabaNoPermission', userId, groupId));
-        }
-    }
-    
     return true;
 }
 
+export default handler;
