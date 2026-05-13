@@ -1,44 +1,63 @@
- 
-export async function before(m, { conn }) {
-    if (!m.isGroup || m.isBaileys) return true;
+//plugin antimedia by Riley
 
-    const chat = global.db.data.chats[m.chat];
-    if (!chat.antimedia) return true;
+export async function before(m, { conn, isAdmin, isBotAdmin, isOwner, isSam }) {
+  if (!m.isGroup) return false
 
-    const msg = m.msg || {};
-    const type = m.mtype || '';
-    const userId = m.sender;
-    const groupId = m.chat;
+  const chat = global.db.data.chats[m.chat]
+  if (!chat?.antimedia) return false
 
-    if (m.sender === conn.user.jid) return true;
+  // Immunità per Admin, Owner, Sam e il bot stesso
+  if (m.fromMe || isAdmin || isOwner || isSam || !isBotAdmin) return false
 
-    const groupMetadata = await conn.groupMetadata(m.chat);
-    const admins = groupMetadata.participants
-        .filter(p => p.admin)
-        .map(p => p.id);
+  // Lascia passare i media "Visualizza una volta"
+  if (
+    m.message?.viewOnceMessage ||
+    m.message?.viewOnceMessageV2 ||
+    m.message?.viewOnceMessageV2Extension
+  ) {
+    return false
+  }
 
-    if (admins.includes(m.sender)) return true;
+  // Rileva Foto o Video normali
+  const hasNormalMedia = !!m.message?.imageMessage || !!m.message?.videoMessage
+  if (!hasNormalMedia) return false
 
-    if (['imageMessage', 'videoMessage'].includes(type)) {
-        const isViewOnce = msg?.[type]?.viewOnce;
-        const isGif = msg?.videoMessage?.gifPlayback;
+  // Eliminazione del messaggio
+  await conn.sendMessage(m.chat, {
+      delete: {
+        remoteJid: m.chat,
+        fromMe: false,
+        id: m.key.id,
+        participant: m.key.participant,
+      },
+    }).catch(() => {})
 
-        if (!isViewOnce || isGif) {
-            await conn.sendMessage(m.chat, {
-                delete: {
-                    remoteJid: m.chat,
-                    fromMe: false,
-                    id: m.key.id,
-                    participant: m.key.participant || m.sender
-                }
-            });
+  // Messaggio estetico in stile RLY-BOT
+  const header = `⋆｡˚『 ╭ \`ANTIMEDIA SYSTEM\` ╯ 』˚｡⋆`
+  const text = `${header}
+╭
+┃ 🛡️ \`Stato:\` *Protocollo Riley Attivo*
+┃
+┃ 『 👤 』 \`Target:\` @${m.sender.split('@')[0]}
+┃ 『 🖼️ 』 \`Rilevato:\` *Media Permanente*
+┃ 『 🚫 』 \`Azione:\` *Eliminazione immediata*
+┃
+┃ ⚠️ \`Nota:\` In questo gruppo sono ammessi 
+┃ solo media *Visualizza una volta*.
+╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`
 
-            await conn.sendMessage(m.chat, {
-                text: global.t('antiMediaWarning', userId, groupId),
-                mentions: [m.sender]
-            });
+  await conn.sendMessage(m.chat, {
+      text,
+      mentions: [m.sender],
+      contextInfo: {
+        externalAdReply: {
+          title: 'RILEY SECURITY',
+          body: 'Restrizione media attiva',
+          thumbnailUrl: 'https://qu.ax/TfUj.jpg',
+          mediaType: 1
         }
-    }
+      }
+    }).catch(() => {})
 
-    return true;
+  return true
 }
