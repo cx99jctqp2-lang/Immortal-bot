@@ -1,115 +1,81 @@
-import fetch from 'node-fetch'
-import { join } from 'path'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-let handler = async (m, { conn, usedPrefix: _p, command, args, isOwner, isAdmin }) => {
-  const userName = m.pushName || 'Utente'
-  
-  // --- PERCORSO IMMAGINE LOCALE ---
-  const localImg = join(process.cwd(), 'IMG-20260509-WA0127.jpg')
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {}
-  global.db.data.settings[conn.user.jid] = global.db.data.settings[conn.user.jid] || {}
-  let chat = global.db.data.chats[m.chat]
-  let bot = global.db.data.settings[conn.user.jid]
+let handler = async (m, { conn, usedPrefix, command }) => {
+    const userId = m.sender;
+    const groupId = m.isGroup ? m.chat : null;
+    const chat = global.db.data.chats[m.chat] || {};
+    const imagePath = path.join(__dirname, '../../media/IMG-20260509-WA0127.jpg');
 
-  // --- CONFIGURAZIONE MODULI ---
-  const securityFeatures = [
-    { key: 'antigore', name: '🚫 Antigore', desc: 'Blocca contenuti splatter/gore' },
-    { key: 'modoadmin', name: '🛡️ Soloadmin', desc: 'Solo gli admin usano il bot' },
-    { key: 'antivoip', name: '📞 Antivoip', desc: 'Rifiuta chiamate nel gruppo' },
-    { key: 'antilink', name: '🔗 Antilink', desc: 'Elimina link gruppi WhatsApp' },
-    { key: 'antilinksocial', name: '🌐 Antilinksocial', desc: 'Elimina link social (IG, TT, ecc)' },
-    { key: 'antitrava', name: '🧱 Antitrava', desc: 'Blocca crash/messaggi lunghi' },
-    { key: 'antinuke', name: '☢️ Antinuke', desc: 'Sicurezza avanzata del gruppo' },
-    { key: 'antiviewonce', name: '👁️ Antiviewonce', desc: 'Invia messaggi visualizza una volta' },
-    { key: 'antispam', name: '🛑 Antispam', desc: 'Blocca spam di comandi' }
-  ]
+    const botName = "ℝ𝕃𝕐 𝔹𝕆𝕋";
+    const menuText = generateMenuText(chat, userId, groupId, botName, usedPrefix);
+    
+    const footerText = `𝕊𝕖𝕝𝕖𝕫𝕚𝕠𝕟𝕒 𝕦𝕟𝕒 𝕔𝕒𝕥𝕖𝕘𝕠𝕣𝕚𝕒 ✨`;
 
-  const automationFeatures = [
-    { key: 'ai', name: '🧠 IA', desc: 'Intelligenza artificiale attiva' },
-    { key: 'vocali', name: '🎤 Siri', desc: 'Risponde con audio ai messaggi' },
-    { key: 'reaction', name: '😎 Reazioni', desc: 'Reazioni automatiche ai messaggi' },
-    { key: 'autolevelup', name: '⬆️ Autolivello', desc: 'Messaggio di livello automatico' },
-    { key: 'welcome', name: '👋 Welcome', desc: 'Messaggio di benvenuto' }
-  ]
+    await conn.sendMessage(m.chat, {
+        image: { url: imagePath },
+        caption: menuText,
+        footer: footerText,
+        buttons: [
+            { buttonId: `${usedPrefix}menu`, buttonText: { displayText: '🏠 Menu Principale' }, type: 1 },
+            { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: '🛡️ Menu Admin' }, type: 1 },
+            { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: '👑 Menu Owner' }, type: 1 },
+            { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: '👥 Menu Gruppo' }, type: 1 },
+            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: '🛠️ Menu Mod' }, type: 1 },
+        ],
+        viewOnce: true,
+        headerType: 4,
+    }, { quoted: m });
+};
 
-  const ownerFeatures = [
-    { key: 'anticall', name: '📵 Antichiamate', desc: 'Blocca chiamate al bot (Global)' },
-    { key: 'antiprivate', name: '🔒 Antiprivato', desc: 'Blocca uso del bot in privato' },
-    { key: 'solocreatore', name: '👑 Solo Creatore', desc: 'Bot risponde solo all\'owner' }
-  ]
+handler.help = ['menusicurezza'];
+handler.tags = ['menu'];
+handler.command = /^(menusicurezza|securitymenu|menusecurity|safety)$/i;
 
-  // --- GENERAZIONE MENU ---
-  if (!args.length || /menu|help/i.test(args[0])) {
-    let text = `
-┎━━━━━━━━━━━━━━━━━━━━┑
-┃   ✧  𝐑𝐋𝐘 - 𝐌𝐀𝐒𝐓𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋  ✧   ┃
-┖━━━━━━━━━━━━━━━━━━━━┙
-┌────────────────────┐
-  👤 𝚄𝚜𝚎𝚛: ${userName}
-  📡 𝚂𝚝𝚊𝚝𝚞𝚜: 𝙾𝚗𝚕𝚒𝚗𝚎
-└────────────────────┘
+export default handler;
 
-*〘 ɪɴsᴛʀᴜᴢɪᴏɴɪ ᴏᴘᴇʀᴀᴛɪᴠᴇ 〙*
-> Attiva o disattiva i moduli:
-*│ ➤* ${_p}*attiva* <nome>
-*│ ➤* ${_p}*disattiva* <nome>
+function generateMenuText(chat, userId, groupId, botName, usedPrefix) {
+    const vs = global.vs || '1.5.0';
+    
+    const functions = {
+        "Anti Link": !!chat?.antiLink,
+        "Anti Link Hard": !!chat?.antiLinkHard,
+        "Anti Spam": !!chat?.antispam,
+        "Anti Trava": !!chat?.antitrava,
+        "Benvenuto": !!chat?.welcome,
+        "Addio": !!chat?.bye,
+        "Anti Bestemmie": !!chat?.antibestemmie,
+        "Solo Admin": !!chat?.soloadmin,
+        "Anti Porno": !!chat?.antiporno,
+        "Anti Call": !!chat?.antiCall,
+        "Anti Virus": !!chat?.antivirus,
+        "Anti Bot": !!chat?.antibot,
+        "Anti Media": !!chat?.antimedia,
+        "Anti TikTok": !!chat?.antitiktok
+    };
 
-*┍━━━━━〔 🛡️ sɪᴄᴜʀᴇᴢᴢᴀ 〕━━━━━┑*
-${securityFeatures.map(f => `┇ ${f.name}\n┇ _${f.desc}_\n┇ ➤ *${f.key}*\n┇`).join('\n')}
-*┕━━━━━━━──ׄ──ׅ──ׄ──━━━━━━━┙*
+    const statusList = Object.entries(functions)
+        .map(([name, state]) => `┃ ${state ? '🟢' : '🔴'} *${name}*`)
+        .join('\n');
 
-*┍━━━━━〔 🤖 ᴀᴜᴛᴏᴍᴀᴢɪᴏɴᴇ 〕━━━━━┑*
-${automationFeatures.map(f => `┇ ${f.name}\n┇ _${f.desc}_\n┇ ➤ *${f.key}*\n┇`).join('\n')}
-*┕━━━━━━━──ׄ──ׅ──ׄ──━━━━━━━┙*
-
-_ʙʟᴅ-ʙᴏᴛ sᴇᴄᴜʀɪᴛʏ ɪɴᴛᴇʀꜰᴀᴄᴇ_`
-
-    // Invio con immagine locale
-    await conn.sendMessage(m.chat, { 
-      image: { url: localImg }, 
-      caption: text.trim(),
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363232743845068@newsletter',
-          newsletterName: "🛡️ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐒𝐄𝐂𝐔𝐑𝐈𝐓𝐘 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 🛡️"
-        }
-      }
-    }, { quoted: m })
-    return
-  }
-
-  // --- LOGICA DI ATTIVAZIONE ---
-  let isEnable = !/disattiva|off|0/i.test(command)
-  let type = args[0].toLowerCase()
-  let status = isEnable ? 'ATTIVATO ✅' : 'DISATTIVATO ❌'
-
-  let dbKey = type
-  if (type === 'antilink') dbKey = 'antiLink'
-  if (type === 'antilinksocial') dbKey = 'antiLink2'
-  if (type === 'antiviewonce') dbKey = 'antioneview'
-  if (type === 'antiprivate') dbKey = 'antiPrivate'
-  if (type === 'solocreatore') dbKey = 'soloCreatore'
-
-  const isSecurity = securityFeatures.some(f => f.key.toLowerCase() === type)
-  const isAuto = automationFeatures.some(f => f.key.toLowerCase() === type)
-  const isOwnerKey = ownerFeatures.some(f => f.key.toLowerCase() === type)
-
-  if (isSecurity || isAuto) {
-    if (!m.isGroup && !isOwner) return m.reply('❌ Solo nei gruppi')
-    if (m.isGroup && !isAdmin && !isOwner) return m.reply('🛡️ Solo per Admin')
-    chat[dbKey] = isEnable
-  } else if (isOwnerKey) {
-    if (!isOwner) return m.reply('👑 Solo per l\'Owner')
-    bot[dbKey] = isEnable
-  } else {
-    return m.reply('❓ Modulo non trovato.')
-  }
-
-  await m.react(isEnable ? '✅' : '❌')
-  m.reply(`『 🛡️ 』 *SISTEMA AGGIORNATO*\n\nModulo: *${type.toUpperCase()}*\nStato: *${status}*`)
+    return `
+┏━━〔 ✨ *${botName}* ✨ 〕━━┓
+┃
+┃ 🛡️ *SICUREZZA & FUNZIONI*
+┃
+┣━━〔 💡 *GUIDA* 〕━━┓
+┃ 🟢 .attiva <funzione>
+┃ 🔴 .disabilita <funzione>
+┃
+┣━━〔 ⚙️ *STATO* 〕━━┓
+${statusList}
+┃
+┣━━〔 📊 *INFO* 〕━━┓
+┃ 🧬 *Versione:* ${vs}
+┃ 👤 *ID:* @${userId.split('@')[0]}
+┃
+┗━━━━━━━━━━━━━━━━━━┛`.trim();
 }
-
-handler.command = ['attiva', 'disattiva', 'on', 'off', 'enable', 'disable']
-export default handler
