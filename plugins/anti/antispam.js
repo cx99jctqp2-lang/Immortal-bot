@@ -1,86 +1,138 @@
-//Plugin antispam fixxed by dieh github.com/watted90 
-let userSpamCounters = {};
-const STICKER_LIMIT = 6, PHOTO_VIDEO_LIMIT = 13, RESET_TIMEOUT = 5000;
+//Plugin anti spam by riley
 
-export async function before(m, { isAdmin, isBotAdmin, conn }) {
-    if (m.isBaileys && m.fromMe) return true;
-    if (!m.isGroup) return false;
+import crypto from 'crypto';
 
-    let bot = global.db.data.settings[this.user.jid] || {};
+const uzer = new Map();
+let lastCleanup = 0;
+const handler = m => m;
+
+handler.before = async function (m, { conn, isAdmin, isBotAdmin, isOwner, isSam }) {
+    if (!m.isGroup) return;
+    const chat = global.db.data.chats[m.chat] || {};
+
+    // Filtri di esclusione
+    if (!chat.antispam || chat.modoadmin || isOwner || isSam || isAdmin || !isBotAdmin) return;
+    if (m.message?.viewOnceMessage) return;
+    if (['reactionMessage', 'pollUpdateMessage', 'protocolMessage'].includes(m.mtype)) return;
+
+    const msgTimestamp = (m.messageTimestamp ? m.messageTimestamp * 1000 : Date.now());
+    if (Date.now() - msgTimestamp > 10000) return; 
+
     const sender = m.sender;
-    const userId = m.sender;
-    const groupId = m.chat;
+    let decodedSender = conn.decodeJid(sender);
+    if (decodedSender.endsWith('@lid')) return;
 
-    if (!userSpamCounters[m.chat]) userSpamCounters[m.chat] = {};
-    if (!userSpamCounters[m.chat][sender]) {
-        userSpamCounters[m.chat][sender] = { 
-            stickerCount: 0, 
-            photoVideoCount: 0, 
-            messageIds: [], 
-            lastMessageTime: 0, 
-            timer: null 
-        };
+    const config = {
+        timeWindow: 10000,      // Finestra di 10 secondi
+        removeThreshold: 10,    // Max messaggi
+        timeThreshold: 1500,    // Media millisecondi tra messaggi
+        cleanupInterval: 300000 // 5 minuti
+    };
+
+    const now = Date.now();
+    if (now - lastCleanup > config.cleanupInterval) {
+        cleanupOldData(config.cleanupInterval);
+        lastCleanup = now;
     }
 
-    const counter = userSpamCounters[m.chat][sender];
-    const currentTime = Date.now();
-    const isSticker = m.message?.stickerMessage;
-    const isPhoto = m.message?.imageMessage || m.message?.videoMessage;
+    let userData = uzer.get(decodedSender);
+    if (!userData) {
+        userData = { timestamps: [], messages: [] };
+        uzer.set(decodedSender, userData);
+    }
 
-    if (isSticker || isPhoto) {
-        if (isSticker) counter.stickerCount++;
-        else if (isPhoto) counter.photoVideoCount++;
+    const messageContent = getMessageContent(m);
+    if (['unknown_message_type', 'error_parsing_message'].includes(messageContent)) return;
 
-        counter.messageIds.push(m.key.id);
-        counter.lastMessageTime = currentTime;
+    const contentHash = crypto.createHash('md5').update(messageContent).digest('hex');
 
-        if (counter.timer) clearTimeout(counter.timer);
+    userData.timestamps.push(msgTimestamp);
+    userData.messages.push({ time: msgTimestamp, hash: contentHash });
 
-        const isStickerSpam = counter.stickerCount >= STICKER_LIMIT;
-        const isPhotoVideoSpam = counter.photoVideoCount >= PHOTO_VIDEO_LIMIT;
+    // Pulizia vecchi log utente
+    userData.timestamps = userData.timestamps.filter(t => now - t < config.timeWindow);
+    userData.messages = userData.messages.filter(msg => now - msg.time < config.timeWindow);
 
-        if (isStickerSpam || isPhotoVideoSpam) {
-            if (isBotAdmin && bot.restrict) {
-                try {
-                    await conn.groupSettingUpdate(m.chat, 'announcement');
-                    
-                    if (!isAdmin) {
-                        await conn.groupParticipantsUpdate(m.chat, [sender], 'remove');
+    const duplicateCount = userData.messages.filter(msg => 
+        msg.hash === contentHash && msg.time !== msgTimestamp
+    ).length;
+
+    let effectiveThreshold = config.removeThreshold;
+    if (duplicateCount > 0) {
+        effectiveThreshold = Math.max(5, config.removeThreshold - (duplicateCount * 2));
+    }
+
+    const messageCount = userData.timestamps.length;
+
+    if (messageCount >= effectiveThreshold) {
+        userData.timestamps.sort((a, b) => a - b);
+        const totalDuration = userData.timestamps[userData.timestamps.length - 1] - userData.timestamps[0];
+        const averageTime = (userData.timestamps.length > 1) ? (totalDuration / (userData.timestamps.length - 1)) : 10000;
+
+        if (averageTime < config.timeThreshold || duplicateCount >= 4) {
+            try {
+                uzer.delete(decodedSender);
+                const typeSanz = duplicateCount >= 4 ? `SPAM DUPLICATI (${duplicateCount + 1}x)` : `FLOOD RAPIDO (${averageTime.toFixed(0)}ms)`;
+
+                const header = `⋆｡˚『 ╭ \`ANTISPAM SYSTEM\` ╯ 』˚｡⋆`;
+                const footer = `╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+                const text = `${header}
+╭
+┃ 🛡️ \`Stato:\` *Protocollo Riley Attivo*
+┃
+┃ 『 👤 』 \`Target:\` @${decodedSender.split('@')[0]}
+┃ 『 ⚡ 』 \`Rilevato:\` *${typeSanz}*
+┃ 『 🚫 』 \`Azione:\` *ELIMINAZIONE UTENTE*
+┃
+┃ ⚠️ \`Nota:\` Lo spam destabilizza il gruppo.
+┃ La sicurezza di Riley ha priorità.
+╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒`;
+
+                await conn.sendMessage(m.chat, {
+                    text,
+                    mentions: [decodedSender],
+                    contextInfo: {
+                        externalAdReply: {
+                            title: 'RILEY ANTI-FLOOD',
+                            body: 'Minaccia spam neutralizzata',
+                            thumbnailUrl: 'https://qu.ax/TfUj.jpg',
+                            mediaType: 1
+                        }
                     }
+                });
 
-                    for (const messageId of counter.messageIds) {
-                        await conn.sendMessage(m.chat, { 
-                            delete: { 
-                                remoteJid: m.chat, 
-                                fromMe: false, 
-                                id: messageId, 
-                                participant: m.key.participant 
-                            } 
-                        });
-                    }
+                await conn.groupParticipantsUpdate(m.chat, [decodedSender], 'remove');
 
-                    await conn.groupSettingUpdate(m.chat, 'not_announcement');
-                    await conn.sendMessage(m.chat, { 
-                        text: global.t('antiSpamDetected', userId, groupId)
-                    });
-                    
-                    delete userSpamCounters[m.chat][sender];
-
-                } catch (error) {
-                    console.error('Errore durante la gestione dello spam:', error);
-                }
+            } catch (e) {
+                console.error(`[AntiSpam] Errore:`, e);
             }
-        } else {
-            counter.timer = setTimeout(() => {
-                delete userSpamCounters[m.chat][sender];
-            }, RESET_TIMEOUT);
-        }
-    } else {
-        if (currentTime - counter.lastMessageTime > RESET_TIMEOUT && 
-            (counter.stickerCount > 0 || counter.photoVideoCount > 0)) {
-            delete userSpamCounters[m.chat][sender];
+            return;
         }
     }
 
-    return true;
+    uzer.set(decodedSender, userData);
+};
+
+function getMessageContent(m) {
+    try {
+        const msg = m.message;
+        if (msg?.conversation) return msg.conversation;
+        if (msg?.extendedTextMessage?.text) return msg.extendedTextMessage.text;
+        if (msg?.imageMessage?.caption) return `img:${msg.imageMessage.caption}`;
+        if (msg?.videoMessage?.caption) return `vid:${msg.videoMessage.caption}`;
+        if (msg?.stickerMessage) return `stk:${msg.stickerMessage.fileSha256?.toString('base64')}`;
+        return 'unknown_message_type';
+    } catch { return 'error_parsing_message'; }
 }
+
+function cleanupOldData(interval) {
+    const now = Date.now();
+    for (const [key, data] of uzer.entries()) {
+        if (!data.timestamps.length || now - data.timestamps[data.timestamps.length - 1] > interval) {
+            uzer.delete(key);
+        }
+    }
+}
+
+export default handler;
