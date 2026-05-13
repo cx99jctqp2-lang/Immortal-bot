@@ -1,3 +1,4 @@
+// by 𝕯𝖊ⱥ𝖉𝖑𝐲 × Bonzino
 
 import fs from 'fs'
 
@@ -27,8 +28,6 @@ let handler = async (m, { conn, text }) => {
 
     let image
     let isFallback = false
-    
-    // se la foto non è disponibile, usiamo l'avatar locale
 
     try {
       const pp = await conn.profilePictureUrl(who, 'image')
