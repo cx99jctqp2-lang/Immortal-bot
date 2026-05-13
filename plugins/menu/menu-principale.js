@@ -62,7 +62,7 @@ function generateMenuText(prefix, botName, userCount, userId, groupId) {
 ┃ ⚡ \`${prefix}ping\`
 ┃
 ┣━━〔 🧠 *INTELLIGENZA* 〕━━┓
-┃ 🤖 \`${prefix}chatunity\`
+┃ 🤖 \`${prefix}rlybot\`
 ┃ 🌍 \`${prefix}lingua\`
 ┃
 ┣━━〔 🛠️ *ASSISTENZA* 〕━━┓
