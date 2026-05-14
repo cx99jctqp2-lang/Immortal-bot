@@ -71,6 +71,6 @@ function generateMenuText(prefix, userId, groupId) {
 ╰★───────────★╯
 
 ꒷꒦ ✦ ୧・︶ : ︶ ꒷꒦ ‧₊ ୧
-> © Powered by 𝐑𝐋𝐘 𝐑𝐈𝐋𝐄𝐘 𝐁𝐎𝐓
+> © Powered by 𝐈𝐌𝐌𝐎𝐑𝐓𝐀𝐋 𝐌𝐀𝐆𝐈𝐂
 `.trim();
 }
