@@ -10,7 +10,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const chat = global.db.data.chats[m.chat] || {};
     const imagePath = path.join(__dirname, '../../media/IMG-20260509-WA0127.jpg');
 
-    const botName = "ℝ𝕃𝕐 𝔹𝕆𝕋";
+    const botName = "𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝕄𝔸𝔾𝕀ℂ";
     const menuText = generateMenuText(chat, userId, groupId, botName, usedPrefix);
     
     const footerText = `𝕊𝕖𝕝𝕖𝕫𝕚𝕠𝕟𝕒 𝕦𝕟𝕒 𝕔𝕒𝕥𝕖𝕘𝕠𝕣𝕚𝕒 ✨`;
