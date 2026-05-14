@@ -92,6 +92,6 @@ function generateMenuText(prefix, userId, groupId) {
 
 ${commandList.split('\n').map(line => `୧ ${line.trim()}`).join('\n')}
 ꒷꒦ ✦ ୧・︶ : ︶ ꒷꒦ ‧₊ ୧
-> © ${global.t('poweredBy', userId, groupId)} 𝐑𝐋𝐘 𝐑𝐈𝐋𝐄𝐘 𝐁𝐎𝐓
+> © ${global.t('poweredBy', userId, groupId)} 𝐈𝐌𝐌𝐎𝐑𝐓𝐀𝐋 𝐌𝐀𝐆𝐈𝐂
 `.trim();
 }
