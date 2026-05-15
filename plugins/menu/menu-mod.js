@@ -9,7 +9,7 @@ const handler = async (message, { conn, usedPrefix, command }) => {
     const groupId = message.isGroup ? message.chat : null;
 
     const menuText = generateMenuText(usedPrefix, userId, groupId);
-    const imagePath = path.join(__dirname, '../../media/IMG-20260509-WA0126.jpg');
+    const imagePath = path.join(__dirname, '../../media/IMG-20260515-WA0039.jpg');
 
     await conn.sendMessage(message.chat, {
         image: { url: imagePath },
