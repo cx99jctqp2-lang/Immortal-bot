@@ -221,11 +221,11 @@ ${truncate(item.stack, 3000)}
 📄 *𝐅𝐢𝐥𝐞:* ${item.file}
 💥 *𝐌𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨:* ${item.message}
 
-> 𝐑𝐋𝐘 𝐁𝐎𝐓`
+> 𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝔹𝕆𝕋`
 
         await conn.sendMessage(m.chat, {
           text: shortMsg,
-          footer: 'Rly bot',
+          footer: 'immortal bot',
           buttons: [
             {
               buttonId: `${usedPrefix}debugplugin ${debugId}`,
