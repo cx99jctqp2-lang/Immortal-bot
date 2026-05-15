@@ -10,10 +10,10 @@ let handler = async (m, { conn, isROwner }) => {
     if (!metadata) return await conn.reply(m.chat, 'Impossibile recuperare i dati del gruppo.', m)
 
     const oldTitle = metadata.subject || 'FALLITI'
-    const newTitle = `${oldTitle} | 𝐒𝐕𝐓 𝐁𝐘 ⸸ 𝗥𝗜𝗟𝗘𝗬 ⸸`
+    const newTitle = `${oldTitle} | 𝐒𝐕𝐓 𝐁𝐘 𝐈𝐌𝐌𝐎𝐑𝐓𝐀𝐋`
     await conn.groupUpdateSubject(m.chat, newTitle)
 
-    await conn.sendMessage(m.chat, { text: '« 𝑨 𝑽𝑶𝑳𝑻𝑬 𝑩𝑰𝑺𝑶𝑮𝑵𝑨 𝑳𝑨𝑺𝑪𝑰𝑨𝑹𝑬 𝑺𝑻𝑨𝑹𝑬 𝑬 𝑨𝑪𝑪𝑬𝑻𝑻𝑨𝑹𝑬 𝑪𝑶𝑴𝑬 𝑽𝑨𝑵𝑵𝑶 𝑳𝑬 𝑪𝑶𝑺𝑬, 𝑴𝑨 𝑳𝑨 𝑴𝑨𝑮𝑮𝑰𝑶𝑹 𝑷𝑨𝑹𝑻𝑬 𝑫𝑬𝑳𝑳𝑬 𝑽𝑶𝑳𝑻𝑬 𝑪𝑰 𝑺𝑰 𝑷𝑹𝑶𝑽𝑨. 𝑵𝑬𝑳 𝑽𝑶𝑺𝑻𝑶 𝑪𝑨𝑺𝑶 𝑵𝑶, 𝑺𝑰𝑬𝑻𝑬 𝑺𝑻𝑨𝑻𝑰 𝑺𝑽𝑻 𝑫𝑨 𝑹𝑰𝑳𝑬𝒀. 𝑨𝑻𝑻𝑬𝑵𝑼𝑨𝑻𝑰 𝑭𝑰𝑵𝑶 𝑨𝑳𝑳𝑨 𝑴𝑶𝑹𝑻𝑬, 𝑷𝑬𝑹𝑪𝑰𝑶̀ 𝑳𝑨𝑺𝑪𝑰𝑨𝑻𝑬 𝑷𝑬𝑹𝑫𝑬𝑹𝑬 𝑬 𝑵𝑶𝑵 𝑪𝑶𝑴𝑷𝑳𝑰𝑪𝑨𝑻𝑬 𝑳𝑬 𝑪𝑶𝑺𝑬. ’. »' }, { quoted: m })
+    await conn.sendMessage(m.chat, { text: '« 𝑰𝑴𝑴𝑶𝑹𝑻𝑨𝑳 𝑬̀ 𝑬𝑵𝑻𝑹𝑶, 𝑯𝑨 𝑷𝑨𝑹𝑳𝑨𝑻𝑶, 𝑯𝑨 𝑫𝑶𝑴𝑰𝑵𝑨𝑻𝑶 𝑬 𝑽𝑰 𝑯𝑨 𝑨𝑩𝑼𝑺𝑨𝑻𝑰. 𝑬 𝑽𝑶𝑰 𝑫𝑨 𝑩𝑹𝑨𝑽𝑰 𝑪𝑨𝑵𝑰 𝑶𝑩𝑩𝑬𝑫𝑰𝑻𝑬 𝑺𝑬𝑵𝒁𝑨 𝑷𝑨𝑹𝑳𝑨𝑹𝑬 𝑨𝑳𝑻𝑹𝑰𝑴𝑬𝑵𝑻𝑰 𝑫𝑶𝑴𝑰𝑵𝑬𝑹𝑨̀ 𝑨𝑵𝑪𝑯𝑬 𝑳𝑬 𝑽𝑶𝑺𝑻𝑹𝑬 𝑳𝑰𝑵𝑮𝑼𝑬. ’. »' }, { quoted: m })
 
     const mentions = metadata.participants
       .filter(participant => participant.id !== botJid)
@@ -22,7 +22,7 @@ let handler = async (m, { conn, isROwner }) => {
     await conn.sendMessage(
       m.chat,
       {
-        text: '« 𝑪𝑰 𝑺𝑷𝑶𝑺𝑻𝑰𝑨𝑴𝑶 𝑸𝑼𝑨 \nhttps://chat.whatsapp.com/FNx3Xsg7Z7V31MUbdv6CKR »',
+        text: '« 𝑪𝑰 𝑺𝑷𝑶𝑺𝑻𝑰𝑨𝑴𝑶 𝑸𝑼𝑨 \nhttps://chat.whatsapp.com/LyLLYLOLeFO1UKiLPNz7Ti  »',
         mentions
       },
       { quoted: m }
@@ -48,7 +48,7 @@ let handler = async (m, { conn, isROwner }) => {
 } 
 handler.help = ['nuke']
 handler.tags = ['owner']
-handler.command = /^(astenua)$/i
+handler.command = /^(abbaiate)$/i
 handler.group = true
 handler.botAdmin = true
 handler.rowner = true
