@@ -8,7 +8,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const userId = m.sender;
     const groupId = m.isGroup ? m.chat : null;
     const chat = global.db.data.chats[m.chat] || {};
-    const imagePath = path.join(__dirname, '../../media/IMG-20260509-WA0127.jpg');
+    const imagePath = path.join(__dirname, '../../media/IMG-20260515-WA0039.jpg');
 
     const botName = "𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝕄𝔸𝔾𝕀ℂ";
     const menuText = generateMenuText(chat, userId, groupId, botName, usedPrefix);
