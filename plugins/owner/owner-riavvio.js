@@ -214,7 +214,7 @@ async function sendRestartWarning(conn, m) {
 
 *𝐏𝐞𝐫 𝐮𝐧 𝐫𝐢𝐚𝐯𝐯𝐢𝐨 𝐩𝐢𝐮̀ 𝐬𝐭𝐚𝐛𝐢𝐥𝐞 𝐞 𝐜𝐨𝐧 𝐢 𝐥𝐨𝐠 𝐯𝐢𝐬𝐢𝐛𝐢𝐥𝐢 𝐧𝐞𝐥 𝐭𝐞𝐫𝐦𝐢𝐧𝐚𝐥𝐞, è 𝐜𝐨𝐧𝐬𝐢𝐠𝐥𝐢𝐚𝐭𝐨 𝐮𝐬𝐚𝐫𝐞 \`nodemon\` 𝐨 \`𝐏𝐌𝟐.\`*
 
-> *𝐑𝐋𝐘 𝐁𝐎𝐓*`
+> *𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝔹𝕆𝕋*`
 
   await conn.sendMessage(
     m.chat,
@@ -389,7 +389,7 @@ async function executeRestart(m, conn) {
 `*❌ 𝐑𝐢𝐚𝐯𝐯𝐢𝐨 𝐟𝐚𝐥𝐥𝐢𝐭𝐨*
 *🧾 𝐄𝐫𝐫𝐨𝐫𝐢:* ${errors}
 
-> *𝐑𝐋𝐘 𝐁𝐎𝐓*`
+> *𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝔹𝕆𝕋*`
     )
   }
 }
