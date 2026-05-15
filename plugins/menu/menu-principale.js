@@ -12,7 +12,7 @@ const handler = async (message, { conn, usedPrefix, command }) => {
     const groupId = message.isGroup ? message.chat : null;
 
     const userCount = Object.keys(global.db.data.users).length;
-    const botName = "ℝ𝕃𝕐 𝔹𝕆𝕋"; 
+    const botName = "𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝕄𝔸𝔾𝕀ℂ"; 
 
     const menuText = generateMenuText(usedPrefix, botName, userCount, userId, groupId);
 
