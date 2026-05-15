@@ -93,7 +93,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 ${truncate(item.stack, 3000)}
 \`\`\`
 
-> 𝐑𝐋𝐘 𝐁𝐎𝐓`
+> 𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝔹𝕆𝕋`
 
     return conn.reply(m.chat, fullMsg, m)
   }
@@ -180,7 +180,7 @@ ${truncate(item.stack, 3000)}
       resultMsg += `\n\n✅ *𝐁𝐚𝐜𝐤𝐮𝐩 𝐃𝐁 𝐞𝐬𝐞𝐠𝐮𝐢𝐭𝐨 𝐜𝐨𝐫𝐫𝐞𝐭𝐭𝐚𝐦𝐞𝐧𝐭𝐞*`
     }
 
-    resultMsg += `\n\n> 𝐑𝐋𝐘 𝐁𝐎𝐓`
+    resultMsg += `\n\n> 𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝔹𝕆𝕋`
 
     await conn.reply(m.chat, truncate(resultMsg), m)
 
