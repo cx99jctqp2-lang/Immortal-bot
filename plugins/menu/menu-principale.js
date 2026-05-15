@@ -16,7 +16,7 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 
     const menuText = generateMenuText(usedPrefix, botName, userCount, userId, groupId);
 
-    const photopath = path.join(__dirname, '../../media/IMG-20260509-WA0130.jpg'); 
+    const photopath = path.join(__dirname, '../../media/IMG-20260515-WA0039.jpg'); 
 
     const footerText = `Powered by 𝕀𝕄𝕄𝕆ℝ𝕋𝔸𝕃 𝕄𝔸𝔾𝕀ℂ✨`;
 
